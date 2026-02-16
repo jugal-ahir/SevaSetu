@@ -1,156 +1,130 @@
-# SevaSetu - Urban Governance Platform
+# 🏗️ SevaSetu - Urban Governance Platform
 
-## Overview
-SevaSetu is a comprehensive urban governance web application that bridges the gap between citizens and municipal authorities, enabling seamless grievance management, real-time service tracking, and transparent governance.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-## Features
-
-### For Citizens
-- **Submit Grievances**: Report urban issues with location, images, and detailed descriptions
-- **Track Status**: Monitor grievance resolution through a visual timeline
-- **Identity Verification**: Secure digital identity verification
-- **Dashboard**: View statistics and recent submissions
-
-### For Officers
-- **Case Management**: View and manage assigned grievances
-- **Status Updates**: Update case status and add notes
-- **SLA Tracking**: Monitor overdue cases and compliance
-
-### For Administrators
-- **User Management**: Manage all system users and roles
-- **Department Management**: Configure departments and assignments
-- **Analytics**: System-wide statistics and performance metrics
-- **Audit Logs**: Complete audit trail of all actions
-
-## Tech Stack
-
-- **Framework**: Next.js 16 (App Router)
-- **Database**: SQLite with Prisma ORM
-- **Styling**: Tailwind CSS v4
-- **Authentication**: JWT-based with bcrypt
-- **Icons**: Heroicons
-- **Fonts**: Inter
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+ installed
-- npm or yarn package manager
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-
-# Configure database
-npx prisma db push
-
-# Generate Prisma client
-npx prisma generate
-
-# Start development server
-npm run dev
-```
-
-Visit `http://localhost:3000` to access the application.
-
-### Environment Variables
-
-```env
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="your-secret-key-here"
-```
-
-## Project Structure
-
-```
-sevasetu/
-├── src/
-│   ├── app/                    # Next.js app router pages
-│   │   ├── (auth)/            # Authentication pages
-│   │   ├── citizen/           # Citizen dashboard & features
-│   │   ├── officer/           # Officer dashboard & features
-│   │   ├── admin/             # Admin dashboard & features
-│   │   └── api/               # API routes
-│   ├── components/            # Reusable components
-│   ├── lib/                   # Utilities and helpers
-│   └── generated/             # Prisma client
-├── prisma/
-│   └── schema.prisma          # Database schema
-└── public/                    # Static assets
-```
-
-## Database Schema
-
-Key models:
-- **User**: Citizens, officers, department heads, and admins
-- **Grievance**: Citizen-submitted issues
-- **Department**: Municipal departments
-- **Region**: Geographic regions
-- **Vehicle**: Municipal vehicles for tracking
-- **AuditLog**: Complete audit trail
-- **SlaRule**: Service level agreement rules
-
-## User Roles
-
-1. **CITIZEN**: Submit and track grievances
-2. **OFFICER**: Manage assigned cases
-3. **DEPT_HEAD**: Department oversight and analytics
-4. **ADMIN/SUPER_ADMIN**: Full system administration
-
-## Security
-
-- JWT-based authentication
-- Password hashing with bcrypt (10 rounds)
-- Role-based access control
-- Audit logging for critical actions
-- Input validation with Zod
-- Secure HTTP-only cookies
-
-## Development
-
-```bash
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Run linter
-npm run lint
-```
-
-## Deployment
-
-The application can be deployed to:
-- Vercel (recommended for Next.js)
-- Railway
-- AWS/GCP/Azure
-- Any Node.js hosting platform
-
-## Contributing
-
-This is a complete, production-ready application. For enhancements:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-MIT License - See LICENSE file for details
-
-## Support
-
-For issues or questions, please open an issue on the repository.
+**SevaSetu** is a premium, high-performance urban governance platform designed to bridge the gap between citizens and municipal authorities. It provides a seamless, transparent, and efficient way to manage grievances, track public services, and ensure accountable governance.
 
 ---
 
-**Built with ❤️ for better urban governance**
+## ✨ Key Features
+
+### 👥 For Citizens
+- **🚀 Rapid Grievance Filing**: Submit issues with location tagging, image uploads, and descriptive details.
+- **📍 Real-time Tracking**: Monitor the progress of your grievances through a live resolution timeline.
+- **🛡️ Secure Identity**: Multi-factor authentication and secure digital identity verification.
+- **📊 Personal Dashboard**: Personalized view of all submissions, status updates, and municipal announcements.
+
+### 👮 For Officers & Dept Heads
+- **📋 Smart Case Management**: Automated grievance routing and intelligent task prioritization.
+- **⏱️ SLA Compliance**: Real-time alerts for pending cases and automated escalation workflows.
+- **📈 Advanced Analytics**: Comprehensive heatmaps and data-driven insights into urban problem areas.
+- **🚛 Resource Management**: Track municipal vehicles and personnel assigned to field-heavy tasks.
+
+### ⚙️ For Administrators
+- **🔑 Granular RBAC**: Role-Based Access Control for citizens, officers, and department heads.
+- **📝 Global Audit Logs**: Every system action is logged for maximum transparency and accountability.
+- **🛠️ System Configuration**: Dynamic management of municipal departments, regions, and SLA rules.
+
+---
+
+## 🚀 Tech Stack
+
+- **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), [Tailwind CSS v4](https://tailwindcss.com/)
+- **Backend**: Next.js API Routes, [Prisma ORM](https://www.prisma.io/)
+- **Database**: SQLite (Development) / PostgreSQL (Production ready)
+- **Auth**: JWT-based secure session management with Bcrypt hashing
+- **UI/UX**: Custom-built premium components with high responsiveness
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+- **Node.js**: 18.0 or higher
+- **npm**: 9.0 or higher
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/jugal-ahir/SevaSetu.git
+   cd sevasetu
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   Create a `.env` file in the root directory:
+   ```env
+   DATABASE_URL="file:./dev.db"
+   JWT_SECRET="generate-a-strong-secret-here"
+   ```
+
+4. **Database Initialization**
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
+
+5. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application.
+
+---
+
+## 📁 Project Structure
+
+```text
+sevasetu/
+├── src/
+│   ├── app/                # Next.js App Router (Pages & API)
+│   ├── components/         # Premium UI Components
+│   ├── lib/                # Shared logic, Prisma client, Utilities
+│   └── services/           # Business logic layers
+├── prisma/                 # Database schema & migrations
+├── public/                 # Optimized static assets
+└── .github/                # GitHub Actions & workflows
+```
+
+---
+
+## 🛡️ Security & Scalability
+
+SevaSetu is built with security first:
+- **XSS/CSRF Protection**: Built-in Next.js security headers.
+- **Rate Limiting**: Protection against brute-force attacks on sensitive routes.
+- **Input Sanitization**: Strict Zod validation for all API payloads.
+- **Auditable**: Complete traceability of all grievance state changes.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+1. Fork the Project.
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the Branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+---
+
+## ⚖️ License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<p align="center">
+  <b>Built with ❤️ for Smarter Urban Governance</b>
+</p>
