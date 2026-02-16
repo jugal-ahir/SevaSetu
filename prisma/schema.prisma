@@ -1,0 +1,224 @@
+// This is your Prisma schema file for SevaSetu
+// Using SQLite for easier local development
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CITIZEN
+  OFFICER
+  DEPT_HEAD
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum GrievanceStatus {
+  SUBMITTED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+enum AuditActionType {
+  LOGIN
+  LOGOUT
+  CREATE_GRIEVANCE
+  UPDATE_GRIEVANCE_STATUS
+  ASSIGN_GRIEVANCE
+  CREATE_USER
+  UPDATE_USER
+  UPDATE_SLA
+  UPDATE_VEHICLE
+  VERIFY_IDENTITY
+}
+
+model User {
+  id                 String                   @id @default(cuid())
+  email              String                   @unique
+  passwordHash       String
+  name               String
+  phone              String?
+  role               Role                     @default(CITIZEN)
+  isVerified         Boolean                  @default(false)
+  nationalId         String?                  @unique
+  departmentId       String?
+  department         Department?              @relation("DepartmentOfficers", fields: [departmentId], references: [id])
+  regionId           String?
+  region             Region?                  @relation("UserRegion", fields: [regionId], references: [id])
+  grievances         Grievance[]              @relation("CitizenGrievances")
+  assignedGrievances Grievance[]              @relation("AssignedOfficer")
+  auditLogs          AuditLog[]
+  statusChanges      GrievanceStatusHistory[]
+  notifications      Notification[]           @relation("UserNotifications")
+  headedDepartment   Department?              @relation("DepartmentHead")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String?
+  headId      String?     @unique
+  officers    User[]      @relation("DepartmentOfficers")
+  head        User?       @relation("DepartmentHead", fields: [headId], references: [id])
+  regions     Region[]    @relation("DepartmentRegions")
+  slaRules    SlaRule[]   @relation("DepartmentSlaRules")
+  grievances  Grievance[] @relation("DepartmentGrievances")
+  vehicles    Vehicle[]   @relation("DepartmentVehicles")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Region {
+  id           String      @id @default(cuid())
+  name         String
+  code         String      @unique
+  departmentId String?
+  department   Department? @relation("DepartmentRegions", fields: [departmentId], references: [id])
+  grievances   Grievance[] @relation("RegionGrievances")
+  vehicles     Vehicle[]   @relation("RegionVehicles")
+  users        User[]      @relation("UserRegion")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Grievance {
+  id             String                   @id @default(cuid())
+  title          String
+  description    String
+  category       String
+  subcategory    String?
+  citizenId      String
+  citizen        User                     @relation("CitizenGrievances", fields: [citizenId], references: [id])
+  assignedToId   String?
+  assignedTo     User?                    @relation("AssignedOfficer", fields: [assignedToId], references: [id])
+  departmentId   String?
+  department     Department?              @relation("DepartmentGrievances", fields: [departmentId], references: [id])
+  regionId       String?
+  region         Region?                  @relation("RegionGrievances", fields: [regionId], references: [id])
+  status         GrievanceStatus          @default(SUBMITTED)
+  priority       String                   @default("NORMAL")
+  imageUrl       String?
+  latitude       Float?
+  longitude      Float?
+  address        String?
+  slaDueAt       DateTime?
+  notifications  Notification[]           @relation("GrievanceNotifications")
+  closedAt       DateTime?
+  history        GrievanceStatusHistory[]
+  auditLogs      AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GrievanceStatusHistory {
+  id          String           @id @default(cuid())
+  grievanceId String
+  grievance   Grievance        @relation(fields: [grievanceId], references: [id])
+  fromStatus  GrievanceStatus?
+  toStatus    GrievanceStatus
+  changedById String?
+  changedBy   User?            @relation(fields: [changedById], references: [id])
+  note        String?
+  createdAt   DateTime         @default(now())
+}
+
+model Vehicle {
+  id                 String                @id @default(cuid())
+  registrationNumber String                @unique
+  type               String
+  departmentId       String?
+  department         Department?           @relation("DepartmentVehicles", fields: [departmentId], references: [id])
+  regionId           String?
+  region             Region?               @relation("RegionVehicles", fields: [regionId], references: [id])
+  isActive           Boolean               @default(true)
+  lastKnownLat       Float?
+  lastKnownLng       Float?
+  lastUpdatedAt      DateTime?
+  locations          VehicleLocationPing[]
+}
+
+model VehicleLocationPing {
+  id        String   @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id          String          @id @default(cuid())
+  actorId     String?
+  actor       User?           @relation(fields: [actorId], references: [id])
+  grievanceId String?
+  grievance   Grievance?      @relation(fields: [grievanceId], references: [id])
+  action      AuditActionType
+  entity      String?
+  entityId    String?
+  metadata    String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime        @default(now())
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation("UserNotifications", fields: [userId], references: [id])
+  title       String
+  message     String
+  type        String    @default("INFO") // INFO, URGENT, SUCCESS
+  isRead      Boolean   @default(false)
+  grievanceId String?
+  grievance   Grievance? @relation("GrievanceNotifications", fields: [grievanceId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model SlaRule {
+  id             String      @id @default(cuid())
+  departmentId   String?
+  department     Department? @relation("DepartmentSlaRules", fields: [departmentId], references: [id])
+  category       String
+  priority       String
+  durationSeconds Int
+  escalationRole Role
+  isActive       Boolean     @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationDataset {
+  id         String   @id @default(cuid())
+  nationalId String   @unique
+  name       String
+  dob        DateTime
+  phone      String?
+  address    String?
+  isActive   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  type  String @default("STRING") // STRING, BOOLEAN, NUMBER
+
+  updatedAt DateTime @updatedAt
+}
