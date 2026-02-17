@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheckIcon, IdentificationIcon } from "@heroicons/react/24/outline";
+import { ShieldCheckIcon, IdentificationIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import AadharScanner from "@/components/AadharScanner";
 
 export default function VerifyPage() {
     const router = useRouter();
@@ -12,6 +13,15 @@ export default function VerifyPage() {
     });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+    const handleExtractionComplete = (data: { nationalId: string; dob: string }) => {
+        setFormData((prev) => ({
+            ...prev,
+            nationalId: data.nationalId || prev.nationalId,
+            dob: data.dob || prev.dob,
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,11 +66,29 @@ export default function VerifyPage() {
 
                 {/* Verification Form */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-                    <div className="mb-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
-                        <p className="text-sm text-blue-700">
-                            <strong>Demo Mode:</strong> Use any National ID and date of birth to verify. In production, this would validate against a government database.
-                        </p>
+                    <div className="mb-6 rounded-lg bg-blue-50 border border-blue-200 p-4 relative overflow-hidden">
+                        <div className="relative z-10 flex flex-col gap-3">
+                            <p className="text-sm text-blue-700">
+                                <strong>Smart Extraction:</strong> You can now scan your Aadhar card to auto-fill the form details.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setIsScannerOpen(true)}
+                                className="flex items-center justify-center gap-2 rounded-lg bg-white border border-blue-200 py-2.5 px-4 text-sm font-bold text-blue-600 shadow-sm hover:bg-blue-600 hover:text-white transition-all group"
+                            >
+                                <SparklesIcon className="h-5 w-5 group-hover:animate-pulse" />
+                                Scan Aadhar Card
+                            </button>
+                        </div>
+                        <div className="absolute top-0 right-0 h-16 w-16 -mr-4 -mt-4 bg-blue-100 rounded-full blur-2xl opacity-50"></div>
                     </div>
+
+                    {isScannerOpen && (
+                        <AadharScanner
+                            onExtractionComplete={handleExtractionComplete}
+                            onClose={() => setIsScannerOpen(false)}
+                        />
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (

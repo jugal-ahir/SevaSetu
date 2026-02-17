@@ -127,7 +127,7 @@ model Grievance {
 model GrievanceStatusHistory {
   id          String           @id @default(cuid())
   grievanceId String
-  grievance   Grievance        @relation(fields: [grievanceId], references: [id])
+  grievance   Grievance        @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
   fromStatus  GrievanceStatus?
   toStatus    GrievanceStatus
   changedById String?
@@ -165,7 +165,7 @@ model AuditLog {
   actorId     String?
   actor       User?           @relation(fields: [actorId], references: [id])
   grievanceId String?
-  grievance   Grievance?      @relation(fields: [grievanceId], references: [id])
+  grievance   Grievance?      @relation(fields: [grievanceId], references: [id], onDelete: SetNull)
   action      AuditActionType
   entity      String?
   entityId    String?
@@ -184,7 +184,7 @@ model Notification {
   type        String    @default("INFO") // INFO, URGENT, SUCCESS
   isRead      Boolean   @default(false)
   grievanceId String?
-  grievance   Grievance? @relation("GrievanceNotifications", fields: [grievanceId], references: [id])
+  grievance   Grievance? @relation("GrievanceNotifications", fields: [grievanceId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
 }
 

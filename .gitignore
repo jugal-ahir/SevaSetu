@@ -43,3 +43,13 @@ next-env.d.ts
 /src/generated/prisma
 
 build_log.txt
+
+# uploads
+/public/uploads
+
+# database
+*.db
+*.db-journal
+*.sqlite
+/prisma/*.db
+/prisma/*.db-journal

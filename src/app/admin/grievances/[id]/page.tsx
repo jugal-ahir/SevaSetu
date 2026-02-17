@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import AdminDeleteGrievanceForm from "@/components/AdminDeleteGrievanceForm";
 import {
     ChevronLeftIcon,
     ShieldCheckIcon,
@@ -83,6 +84,31 @@ export default async function AdminGrievanceDetail({ params }: { params: Promise
                 }
             })
         ]);
+
+        redirect(`/admin/grievances`);
+    }
+
+    async function adminDeleteGrievance(formData: FormData) {
+        "use server";
+        const grievanceId = formData.get("grievanceId") as string;
+        const user = await getCurrentUser();
+
+        if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) return;
+
+        // Log the action first, then delete concurrently
+        await prisma.auditLog.create({
+            data: {
+                action: "UPDATE_GRIEVANCE_STATUS",
+                entity: "Grievance",
+                entityId: grievanceId,
+                metadata: JSON.stringify({ action: "DELETE_GRIEVANCE", deletedGrievanceId: grievanceId }),
+                actorId: user.id,
+            }
+        });
+
+        await prisma.grievance.delete({
+            where: { id: grievanceId },
+        });
 
         redirect(`/admin/grievances`);
     }
@@ -237,6 +263,17 @@ export default async function AdminGrievanceDetail({ params }: { params: Promise
                                     Commit Changes
                                 </button>
                             </form>
+
+                            <div className="mt-8 pt-8 border-t border-slate-100">
+                                <h3 className="text-xs font-bold text-red-600 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
+                                    <ExclamationTriangleIcon className="h-4 w-4" />
+                                    Danger Zone
+                                </h3>
+                                <AdminDeleteGrievanceForm
+                                    grievanceId={grievance.id}
+                                    onDelete={adminDeleteGrievance}
+                                />
+                            </div>
                         </div>
 
                         {/* Secondary Info */}

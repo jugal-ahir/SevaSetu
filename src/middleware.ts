@@ -68,7 +68,8 @@ export async function middleware(request: NextRequest) {
 
   // 6. Handle Auth redirection for Guest/Public paths
   if (publicPaths.includes(pathname)) {
-    if (token && userRole) {
+    // Only redirect to dashboard if user is authenticated AND verified
+    if (token && userRole && isVerified) {
       return NextResponse.redirect(new URL(getDashboardPath(userRole), request.url));
     }
     return NextResponse.next();
@@ -80,8 +81,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // 7. Verification Check
-  if (!isVerified && !pathname.startsWith("/verify")) {
-    return NextResponse.redirect(new URL("/verify", request.url));
+  if (!isVerified) {
+    if (!pathname.startsWith("/verify")) {
+      return NextResponse.redirect(new URL("/verify", request.url));
+    }
+  } else {
+    // If user is verified and tries to access /verify, redirect to dashboard
+    if (pathname.startsWith("/verify")) {
+      return NextResponse.redirect(new URL(getDashboardPath(userRole), request.url));
+    }
   }
 
   // 8. Role-Based Access Control (RBAC)

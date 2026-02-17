@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { PhotoIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon, MapPinIcon, SparklesIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 export default function NewGrievancePage() {
     const router = useRouter();
@@ -22,6 +22,9 @@ export default function NewGrievancePage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [detectingLocation, setDetectingLocation] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState("");
+    const [isScanning, setIsScanning] = useState(false);
+    const [scanComplete, setScanComplete] = useState(false);
 
     const categories = [
         { value: "ROADS", label: "Roads & Infrastructure", subcategories: ["Potholes", "Street Lights", "Drainage"] },
@@ -71,16 +74,73 @@ export default function NewGrievancePage() {
         }
     };
 
+    const handleAIScan = async () => {
+        if (!imageFile) {
+            setError("Please select an image first to scan.");
+            return;
+        }
+
+        setIsScanning(true);
+        setError("");
+
+        try {
+            const scanFormData = new FormData();
+            scanFormData.append("file", imageFile);
+
+            const res = await fetch("/api/analyze-image", {
+                method: "POST",
+                body: scanFormData,
+            });
+
+            if (!res.ok) throw new Error("AI Analysis failed");
+
+            const data = await res.json();
+
+            // Artificial delay for animation
+            await new Promise(r => setTimeout(r, 3000));
+
+            setFormData(prev => ({
+                ...prev,
+                ...data,
+                departmentId: departments.find(d => d.name.toUpperCase().includes(data.category))?.id || prev.departmentId
+            }));
+
+            setScanComplete(true);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsScanning(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
+        setUploadProgress("Preparing submission...");
 
         try {
-            // In a real app, you would upload the image first and get a URL
-            // For now, we'll just use a placeholder
-            const imageUrl = imageFile ? "/placeholder-image.jpg" : null;
+            let imageUrl = null;
+            if (imageFile) {
+                setUploadProgress("Uploading image...");
+                const uploadFormData = new FormData();
+                uploadFormData.append("file", imageFile);
 
+                const uploadRes = await fetch("/api/upload", {
+                    method: "POST",
+                    body: uploadFormData,
+                });
+
+                if (!uploadRes.ok) {
+                    const uploadData = await uploadRes.json();
+                    throw new Error(uploadData.error || "Image upload failed");
+                }
+
+                const uploadData = await uploadRes.json();
+                imageUrl = uploadData.imageUrl;
+            }
+
+            setUploadProgress("Submitting grievance details...");
             const res = await fetch("/api/grievances", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -108,11 +168,9 @@ export default function NewGrievancePage() {
             router.push(`/citizen/grievances/${data.grievance.id}`);
         } catch (err: any) {
             setError(err.message);
-            // Scroll to top to show error
             window.scrollTo({ top: 0, behavior: "smooth" });
             setLoading(false);
         }
-        // Do not set loading to false on success to prevent button flickering before redirect
     };
 
     return (
@@ -134,6 +192,49 @@ export default function NewGrievancePage() {
                         )}
 
                         <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                Upload Image & AI Scan
+                            </label>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-4 text-sm font-bold text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50">
+                                    <PhotoIcon className="h-6 w-6 text-blue-500" />
+                                    {imageFile ? "Change Image" : "Choose Image"}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            setImageFile(e.target.files?.[0] || null);
+                                            setScanComplete(false);
+                                        }}
+                                        className="hidden"
+                                    />
+                                </label>
+
+                                {imageFile && !scanComplete && (
+                                    <button
+                                        type="button"
+                                        onClick={handleAIScan}
+                                        disabled={isScanning}
+                                        className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        <SparklesIcon className={`h-5 w-5 ${isScanning ? "animate-spin" : ""}`} />
+                                        {isScanning ? "Scanning..." : "Scan Image with AI"}
+                                    </button>
+                                )}
+
+                                {scanComplete && (
+                                    <div className="flex items-center gap-2 rounded-xl bg-green-50 px-6 py-4 text-sm font-bold text-green-700 border border-green-100">
+                                        <CheckCircleIcon className="h-5 w-5" />
+                                        AI Scan Successful!
+                                    </div>
+                                )}
+                            </div>
+                            {imageFile && (
+                                <p className="mt-2 text-xs text-slate-500 italic pl-1">Selected: {imageFile.name}</p>
+                            )}
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-100">
                             <label htmlFor="title" className="block text-sm font-medium text-slate-700">
                                 Title *
                             </label>
@@ -264,34 +365,13 @@ export default function NewGrievancePage() {
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Upload Image (Optional)
-                            </label>
-                            <div className="flex items-center gap-4">
-                                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50">
-                                    <PhotoIcon className="h-5 w-5" />
-                                    Choose Image
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                                        className="hidden"
-                                    />
-                                </label>
-                                {imageFile && (
-                                    <span className="text-sm text-slate-600">{imageFile.name}</span>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="flex gap-4 pt-4">
+                        <div className="flex gap-4 pt-8">
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? "Submitting..." : "Submit Grievance"}
+                                {loading ? uploadProgress || "Submitting..." : "Submit Grievance"}
                             </button>
                             <button
                                 type="button"
@@ -304,6 +384,28 @@ export default function NewGrievancePage() {
                     </form>
                 </div>
             </main>
+
+            {/* Scanning Animation Overlay */}
+            {isScanning && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
+                    <div className="relative h-80 w-80 overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl ring-1 ring-white/20">
+                        <div className="animate-scan" />
+                        <div className="flex h-full flex-col items-center justify-center space-y-6">
+                            <div className="relative">
+                                <SparklesIcon className="h-16 w-16 text-blue-500 animate-pulse" />
+                                <div className="absolute -inset-4 rounded-full border border-blue-100 animate-ping opacity-25" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-lg font-black text-slate-900 uppercase tracking-[0.2em]">AI Scanning</p>
+                                <p className="text-sm text-slate-500 mt-2 font-medium">Analyzing image content...</p>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-blue-500 h-full animate-progress" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
