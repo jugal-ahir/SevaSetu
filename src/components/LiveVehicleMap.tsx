@@ -42,8 +42,8 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
         return L.divIcon({
             className: "bg-transparent",
             html: `
-                <div style="transform: rotate(${rotation}deg); transition: transform 0.1s linear;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" style="width: 40px; height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));" />
+                <div style="transform: rotate(${rotation - 90}deg); transition: transform 0.1s linear;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2555/2555013.png" style="width: 40px; height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));" />
                 </div>
             `,
             iconSize: [40, 40],
