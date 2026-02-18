@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 import LoadingScreen from "@/components/LoadingScreen";
+import Chatbot from "@/components/Chatbot";
 
 export default function RootLayout({
   children,
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <LoadingScreen />
+        <Chatbot />
         {children}
       </body>
     </html>
