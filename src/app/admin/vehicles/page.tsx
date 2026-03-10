@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import AdminVehiclesClient from "@/components/AdminVehiclesClient";
+import { TruckIcon } from "@heroicons/react/24/outline";
 
 export default async function AdminVehicles() {
     const user = await getCurrentUser();
@@ -49,20 +50,37 @@ export default async function AdminVehicles() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/30">
+            {/* Subtle background decoration */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute top-[0%] right-[-10%] w-[60%] h-[60%] rounded-full bg-emerald-100/40 blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] rounded-full bg-teal-100/40 blur-[100px]" />
+            </div>
+
             <Navbar userRole={user.role} userName={user.name} />
-            <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+            <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">Vehicle Management</h1>
-                    <p className="mt-2 text-slate-600">Add and manage municipal fleet tracking</p>
+                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2 flex items-center gap-3">
+                        <TruckIcon className="h-8 w-8 text-emerald-600" />
+                        Vehicle Fleet Management
+                    </h1>
+                    <p className="text-lg text-slate-500 font-medium ml-11">
+                        Add, assign, and manage municipal tracking vehicles
+                    </p>
                 </div>
 
-                <AdminVehiclesClient
-                    initialVehicles={vehicles as any}
-                    departments={departments}
-                    createVehicleAction={createVehicle}
-                    deleteVehicleAction={deleteVehicle}
-                />
+                <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-bl-full pointer-events-none transition-colors"></div>
+                    <div className="relative z-10">
+                        <AdminVehiclesClient
+                            initialVehicles={vehicles as any}
+                            departments={departments}
+                            createVehicleAction={createVehicle}
+                            deleteVehicleAction={deleteVehicle}
+                        />
+                    </div>
+                </div>
             </main>
         </div>
     );

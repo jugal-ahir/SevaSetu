@@ -1,61 +1,183 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { UserCircleIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, BuildingOfficeIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
-export default async function DeptHeadProfile() {
-    const user = await getCurrentUser();
+export default function DeptHeadProfile() {
+    const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [toggling2FA, setToggling2FA] = useState(false);
 
-    if (!user || user.role !== "DEPT_HEAD") {
-        redirect("/login");
-    }
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const res = await fetch("/api/auth/me?full=true");
+                if (!res.ok) {
+                    router.push("/login");
+                    return;
+                }
+                const data = await res.json();
+                if (data.role !== "DEPT_HEAD") {
+                    router.push("/login");
+                    return;
+                }
+                setUser(data);
+            } catch (err) {
+                router.push("/login");
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchUser();
+    }, [router]);
 
-    const deptHead = await prisma.user.findUnique({
-        where: { id: user.id },
-        include: { department: true }
-    });
+    const handleToggle2FA = async () => {
+        if (!user || toggling2FA) return;
+        setToggling2FA(true);
+        try {
+            const res = await fetch("/api/auth/2fa/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled: !user.twoFactorEnabled }),
+            });
+            if (res.ok) {
+                setUser({ ...user, twoFactorEnabled: !user.twoFactorEnabled });
+            }
+        } catch (err) {
+            console.error("Toggle 2FA error:", err);
+        } finally {
+            setToggling2FA(false);
+        }
+    };
 
-    if (!deptHead) return null;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+    );
+    if (!user) return null;
 
     return (
         <div className="min-h-screen bg-slate-50">
             <Navbar userRole="DEPT_HEAD" userName={user.name} />
 
-            <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">Department Head Profile</h1>
-                    <p className="mt-2 text-slate-600">Manage your departmental authority profile</p>
+                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                        Authority Profile
+                    </h1>
+                    <p className="text-lg text-slate-500 font-medium">
+                        Management clearance and departmental oversight
+                    </p>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-8 text-center">
-                        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white text-blue-600 shadow-lg">
-                            <UserCircleIcon className="h-16 w-16" />
-                        </div>
-                        <h2 className="mt-4 text-2xl font-bold text-white">{deptHead.name}</h2>
-                        <p className="text-blue-100">{deptHead.email}</p>
-                    </div>
+                <div className="grid md:grid-cols-3 gap-6">
+                    {/* ID Card */}
+                    <div className="md:col-span-1">
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm overflow-hidden relative group">
+                            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600 to-indigo-600">
+                                <div className="absolute inset-0 bg-white/10 opacity-50 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                            </div>
 
-                    <div className="px-8 py-6">
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
-                                    <BuildingOfficeIcon className="h-5 w-5" />
+                            <div className="px-6 pb-8 pt-16 text-center relative z-10">
+                                <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-white text-blue-600 shadow-xl border-4 border-white relative group-hover:scale-105 transition-transform duration-500">
+                                    <UserCircleIcon className="h-24 w-24 text-slate-300" />
+                                    <div className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-indigo-500 border-2 border-white"></div>
                                 </div>
-                                <div>
-                                    <p className="text-xs font-medium text-slate-500 uppercase">Managing Department</p>
-                                    <p className="font-semibold text-slate-900">{deptHead.department?.name || "N/A"}</p>
+
+                                <h2 className="mt-5 text-2xl font-heading font-black text-slate-900">{user.name}</h2>
+                                <p className="text-sm font-medium text-slate-500 mb-4">{user.email}</p>
+
+                                <div className="inline-flex flex-col gap-2 w-full">
+                                    <div className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-100 px-4 py-2 mt-2 w-full">
+                                        <BuildingOfficeIcon className="h-4 w-4 text-indigo-600" />
+                                        <span className="text-xs font-black uppercase tracking-widest text-indigo-700">
+                                            DEPT HEAD
+                                        </span>
+                                    </div>
+                                    <div className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 border border-amber-100 px-4 py-2 w-full">
+                                        <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></div>
+                                        <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
+                                            Management Active
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                <p className="text-xs font-medium text-slate-500 uppercase">Verification Level</p>
-                                <p className="font-semibold text-blue-600">DEPARTMENTAL HEAD (LEVEL 2)</p>
+                        </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="md:col-span-2 space-y-6">
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8">
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <BuildingOfficeIcon className="h-5 w-5 text-slate-400" />
+                                Departmental Authority
+                            </h3>
+
+                            <div className="space-y-6">
+                                <div className="group">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Managing Department</p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                            <BuildingOfficeIcon className="h-5 w-5" />
+                                        </div>
+                                        <p className="font-bold text-slate-900 text-lg">{user.department?.name || "N/A"}</p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 border-t border-slate-100">
+                                    <p className="text-sm font-medium text-slate-500">
+                                        Verification Level: <span className="text-indigo-600 font-bold">DEPARTMENTAL HEAD (LEVEL 2)</span>
+                                    </p>
+                                    <p className="mt-2 text-xs text-slate-400">
+                                        Your account has authorization to oversee all grievance routing, officer assignments, and SLA analytics within your department.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full pointer-events-none"></div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2 relative z-10">
+                                <BuildingOfficeIcon className="h-5 w-5 text-slate-400" />
+                                Security & 2FA
+                            </h3>
+                            <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+                                <button
+                                    onClick={() => setIsPasswordModalOpen(true)}
+                                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white border border-slate-200 font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95"
+                                >
+                                    Change Password
+                                </button>
+                                <button
+                                    onClick={handleToggle2FA}
+                                    disabled={toggling2FA}
+                                    className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 ${user.twoFactorEnabled
+                                        ? "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                                        : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"}`}
+                                >
+                                    {toggling2FA ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        user.twoFactorEnabled ? "Disable 2FA Security" : "Enable 2FA Security"
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </main>
+
+            <ChangePasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+            />
         </div>
     );
 }

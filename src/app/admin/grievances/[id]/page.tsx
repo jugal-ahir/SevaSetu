@@ -11,7 +11,11 @@ import {
     UserIcon,
     BuildingOfficeIcon,
     ClockIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    WrenchScrewdriverIcon,
+    ArrowsRightLeftIcon,
+    DocumentTextIcon,
+    TrashIcon
 } from "@heroicons/react/24/outline";
 
 export default async function AdminGrievanceDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -114,192 +118,282 @@ export default async function AdminGrievanceDetail({ params }: { params: Promise
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-amber-500/30">
+            {/* Subtle background decoration */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] rounded-full bg-amber-100/30 blur-[100px]" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-orange-100/30 blur-[120px]" />
+            </div>
+
             <Navbar userRole={user.role} userName={user.name} />
 
-            <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-                <Link href="/admin/grievances" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-blue-600">
-                    <ChevronLeftIcon className="h-4 w-4" />
-                    Back to All Grievances
-                </Link>
+            <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
+                <div className="mb-6">
+                    <Link href="/admin/grievances" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-amber-600 transition-colors bg-white/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-slate-200/60 shadow-sm w-fit">
+                        <ChevronLeftIcon className="h-4 w-4" />
+                        Back to Grievances Registry
+                    </Link>
+                </div>
 
                 <div className="grid gap-8 lg:grid-cols-3">
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="lg:col-span-2 space-y-8">
                         {/* Main Content */}
-                        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <span className={`rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider ${grievance.status === "ESCALATED" ? "bg-red-100 text-red-700" :
-                                        grievance.status === "RESOLVED" ? "bg-green-100 text-green-700" :
-                                            "bg-blue-100 text-blue-700"
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8 relative overflow-hidden">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <StatusBadge status={grievance.status} />
+                                    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-widest border ${grievance.priority === "URGENT" ? "bg-red-50 text-red-700 border-red-200 animate-pulse" :
+                                        grievance.priority === "HIGH" ? "bg-orange-50 text-orange-700 border-orange-200" :
+                                            "bg-slate-50 text-slate-600 border-slate-200"
                                         }`}>
-                                        {grievance.status}
-                                    </span>
-                                    <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${grievance.priority === "URGENT" ? "bg-red-600 text-white animate-pulse" :
-                                        grievance.priority === "HIGH" ? "bg-orange-100 text-orange-700" :
-                                            "bg-slate-100 text-slate-700"
-                                        }`}>
+                                        {grievance.priority === "URGENT" && <ExclamationTriangleIcon className="h-3.5 w-3.5" />}
                                         {grievance.priority}
                                     </span>
-                                    <span className="text-xs font-mono text-slate-400">ID: {grievance.id.slice(0, 8)}</span>
+                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-500">
+                                        <DocumentTextIcon className="h-4 w-4" />
+                                        #{grievance.id.slice(0, 8).toUpperCase()}
+                                    </span>
                                 </div>
-                                <div className="flex items-center gap-1 text-xs text-slate-500">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-fit">
                                     <ClockIcon className="h-4 w-4" />
-                                    {new Date(grievance.createdAt).toLocaleDateString()}
+                                    Submitted {new Date(grievance.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </div>
                             </div>
 
-                            <h1 className="text-3xl font-extrabold text-slate-900 leading-tight">{grievance.title}</h1>
+                            <h1 className="text-3xl sm:text-4xl font-heading font-black text-slate-900 leading-tight mb-8">
+                                {grievance.title}
+                            </h1>
 
-                            {grievance.slaDueAt && (
-                                <div className={`mt-6 flex items-center gap-4 rounded-2xl p-5 border ${new Date(grievance.slaDueAt) < new Date() ? "bg-red-50 border-red-100" : "bg-blue-50 border-blue-100"}`}>
-                                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${new Date(grievance.slaDueAt) < new Date() ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}>
-                                        <ClockIcon className="h-6 w-6" />
+                            {/* Info Grid */}
+                            <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                                <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex items-start gap-4 hover:border-blue-200 hover:bg-white transition-colors group">
+                                    <div className="p-2.5 rounded-xl bg-blue-100 text-blue-600 shadow-inner group-hover:scale-110 transition-transform">
+                                        <UserIcon className="h-5 w-5" />
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Resolution Deadline</p>
-                                        <p className={`text-lg font-bold ${new Date(grievance.slaDueAt) < new Date() ? "text-red-700" : "text-blue-900"}`}>
-                                            {new Date(grievance.slaDueAt).toLocaleString()}
-                                            {new Date(grievance.slaDueAt) < new Date() && <span className="ml-2 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-red-600 text-white animate-pulse">SLA BREACHED</span>}
-                                        </p>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1 mt-0.5">Reporter</p>
+                                        <p className="text-sm font-bold text-slate-900 truncate">{grievance.citizen.name}</p>
+                                        <p className="text-xs font-medium text-slate-500 truncate">{grievance.citizen.email}</p>
                                     </div>
-                                    {grievance.priority === "URGENT" && (
-                                        <div className="hidden sm:flex items-center gap-2 rounded-full bg-red-600 px-4 py-1.5 text-xs font-black text-white uppercase tracking-widest">
-                                            <ExclamationTriangleIcon className="h-4 w-4" />
-                                            Urgent
-                                        </div>
-                                    )}
                                 </div>
-                            )}
 
-                            <p className="mt-8 text-lg text-slate-600 whitespace-pre-wrap leading-relaxed">
-                                {grievance.description}
-                            </p>
+                                <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex items-start gap-4 hover:border-indigo-200 hover:bg-white transition-colors group">
+                                    <div className="p-2.5 rounded-xl bg-indigo-100 text-indigo-600 shadow-inner group-hover:scale-110 transition-transform">
+                                        <BuildingOfficeIcon className="h-5 w-5" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1 mt-0.5">Assigned To</p>
+                                        <p className="text-sm font-bold text-slate-900 truncate">{grievance.department?.name || "Unassigned"}</p>
+                                        <p className="text-xs font-medium text-slate-500 truncate">{grievance.assignedTo?.name ? `Officer: ${grievance.assignedTo.name}` : "Pending Assignment"}</p>
+                                    </div>
+                                </div>
+
+                                {grievance.address && (
+                                    <div className="sm:col-span-2 rounded-2xl bg-slate-50 border border-slate-100 p-4 flex items-start gap-4">
+                                        <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-600 shadow-inner mt-1">
+                                            <MapPinIcon className="h-5 w-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1 mt-0.5">Location</p>
+                                            <p className="text-sm font-bold text-slate-900 leading-relaxed">{grievance.address}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="rounded-2xl bg-slate-50 border border-slate-100 p-6 sm:p-8">
+                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Description of Issue</h3>
+                                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
+                                    {grievance.description}
+                                </p>
+                            </div>
 
                             {grievance.imageUrl && (
-                                <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200">
-                                    <img src={grievance.imageUrl} alt="Attachment" className="w-full object-cover transition-transform hover:scale-[1.02]" />
+                                <div className="mt-8 rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden bg-white p-2">
+                                    <img src={grievance.imageUrl} alt="Attachment" className="w-full h-auto max-h-[500px] object-contain rounded-xl" />
                                 </div>
                             )}
                         </div>
 
                         {/* Audit History */}
-                        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                            <h2 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-2">
-                                <ShieldCheckIcon className="h-6 w-6 text-blue-600" />
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8">
+                            <h2 className="text-xl font-heading font-bold text-slate-900 mb-8 flex items-center gap-2">
+                                <ShieldCheckIcon className="h-6 w-6 text-indigo-500" />
                                 System Audit Trail
                             </h2>
-                            <div className="space-y-8">
-                                {grievance.history.map((item, idx) => (
-                                    <div key={item.id} className="relative pl-10">
-                                        {idx !== grievance.history.length - 1 && (
-                                            <div className="absolute left-[19px] top-6 h-full w-px bg-slate-100" />
-                                        )}
-                                        <div className="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 border border-slate-200">
-                                            <div className="h-2 w-2 rounded-full bg-current" />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center justify-between">
-                                                <p className="font-bold text-slate-900">Status: {item.toStatus}</p>
-                                                <time className="text-xs text-slate-500">{new Date(item.createdAt).toLocaleString()}</time>
+                            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                                {grievance.history.map((entry, index) => {
+                                    const isLatest = index === 0;
+                                    return (
+                                        <div key={entry.id} className="relative flex items-start justify-between md:justify-normal md:odd:flex-row-reverse group">
+                                            <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-white shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">
+                                                {isLatest ? (
+                                                    <div className="h-6 w-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center shadow-inner">
+                                                        <div className="h-2 w-2 rounded-full bg-white animate-pulse"></div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-4 w-4 rounded-full bg-slate-300"></div>
+                                                )}
                                             </div>
-                                            <p className="mt-1 text-slate-600">{item.note}</p>
-                                            <div className="mt-2 flex items-center gap-2">
-                                                <div className="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600 uppercase">
-                                                    {(item.changedBy?.name?.[0] || 'S')}
+
+                                            <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-2xl bg-white border border-slate-200/60 shadow-sm group-hover:shadow-md transition-all group-hover:-translate-y-1 relative">
+                                                <div className="hidden md:block absolute top-[1.2rem] w-4 h-4 bg-white border-t border-r border-slate-200/60 rotate-45 transform group-odd:-left-2 group-odd:-rotate-135 group-odd:border-r-0 group-odd:border-b group-even:-right-2 group-even:border-l-0 group-even:border-b-0"></div>
+
+                                                <div className="flex flex-col gap-2 mb-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <StatusBadge status={entry.toStatus} />
+                                                        <span className="text-xs font-bold text-slate-400">
+                                                            {new Date(entry.createdAt).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <span className="text-xs font-medium text-slate-500">{item.changedBy?.name || "System"}</span>
+
+                                                <p className="text-sm font-medium text-slate-700">
+                                                    By <span className="font-bold text-slate-900">{entry.changedBy?.name || "System"}</span>
+                                                </p>
+
+                                                {entry.note && (
+                                                    <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-600 italic">
+                                                        "{entry.note}"
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
 
                     {/* Admin Actions Sidebar */}
                     <div className="space-y-6">
-                        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm ring-1 ring-blue-50">
-                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                <ShieldCheckIcon className="h-5 w-5 text-blue-600" />
-                                Administrative Override
-                            </h2>
-                            <form action={adminUpdateGrievance} className="space-y-5">
+                        {grievance.slaDueAt && (
+                            <div className={`rounded-3xl border p-6 sm:p-8 bg-gradient-to-br ${new Date(grievance.slaDueAt) < new Date()
+                                    ? "from-red-50 to-white border-red-200/60 shadow-red-500/5 shadow-sm"
+                                    : "from-amber-50 to-white border-amber-200/60 shadow-amber-500/5 shadow-sm"
+                                }`}>
+                                <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-3 flex items-center gap-2 ${new Date(grievance.slaDueAt) < new Date() ? "text-red-700" : "text-amber-800"
+                                    }`}>
+                                    <ClockIcon className="h-5 w-5" />
+                                    Resolution Target
+                                </h3>
+                                <div>
+                                    <p className={`text-2xl font-black ${new Date(grievance.slaDueAt) < new Date() ? "text-red-900" : "text-amber-900"
+                                        }`}>
+                                        {new Date(grievance.slaDueAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </p>
+                                    <p className={`text-sm font-bold ${new Date(grievance.slaDueAt) < new Date() ? "text-red-600" : "text-amber-700"
+                                        }`}>
+                                        {new Date(grievance.slaDueAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(grievance.slaDueAt) < new Date() && " (SLA Overdue)"}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="rounded-3xl border border-slate-200/60 bg-white shadow-sm overflow-hidden ring-1 ring-blue-50">
+                            <div className="bg-slate-900 px-6 py-5 border-b border-slate-800 flex items-center gap-3">
+                                <WrenchScrewdriverIcon className="h-5 w-5 text-blue-400" />
+                                <h2 className="text-lg font-bold text-white tracking-wide">
+                                    Administrative Override
+                                </h2>
+                            </div>
+
+                            <form action={adminUpdateGrievance} className="p-6 sm:p-8 space-y-6">
                                 <input type="hidden" name="grievanceId" value={grievance.id} />
 
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Modify Status</label>
-                                    <select name="status" defaultValue={grievance.status} className="mt-2 block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none">
-                                        <option value="SUBMITTED">Submitted</option>
-                                        <option value="ASSIGNED">Assigned</option>
-                                        <option value="IN_PROGRESS">In Progress</option>
-                                        <option value="RESOLVED">Resolved</option>
-                                        <option value="CLOSED">Closed/Archived</option>
-                                        <option value="ESCALATED">Escalated</option>
-                                    </select>
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Modify Status</label>
+                                    <div className="relative">
+                                        <select
+                                            name="status"
+                                            defaultValue={grievance.status}
+                                            className="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none outline-none cursor-pointer"
+                                        >
+                                            <option value="SUBMITTED">Submitted</option>
+                                            <option value="ASSIGNED">Assigned</option>
+                                            <option value="IN_PROGRESS">In Progress</option>
+                                            <option value="RESOLVED">Resolved</option>
+                                            <option value="CLOSED">Closed (Archived)</option>
+                                            <option value="ESCALATED">Escalated</option>
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <ArrowsRightLeftIcon className="h-4 w-4 text-slate-400 rotate-90" />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Transfer Department</label>
-                                    <select name="departmentId" defaultValue={grievance.departmentId || ""} className="mt-2 block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
-                                        <option value="">No Change</option>
-                                        {departments.map(d => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
-                                        ))}
-                                    </select>
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Transfer Department</label>
+                                    <div className="relative">
+                                        <select
+                                            name="departmentId"
+                                            defaultValue={grievance.departmentId || ""}
+                                            className="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none outline-none cursor-pointer"
+                                        >
+                                            <option value="">No Change</option>
+                                            {departments.map(d => (
+                                                <option key={d.id} value={d.id}>{d.name}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <BuildingOfficeIcon className="h-4 w-4 text-slate-400" />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Internal Note</label>
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Internal Audit Note</label>
                                     <textarea
                                         name="note"
-                                        rows={4}
-                                        className="mt-2 block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none resize-none"
-                                        placeholder="Reason for administrative change..."
+                                        rows={3}
+                                        className="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all outline-none resize-none"
+                                        placeholder="Reason for override..."
                                     />
                                 </div>
 
-                                <button type="submit" className="w-full rounded-xl bg-slate-900 px-6 py-4 font-bold text-white shadow-xl hover:bg-black hover:-translate-y-0.5 transition-all focus:ring-4 focus:ring-slate-300">
-                                    Commit Changes
+                                <button type="submit" className="w-full rounded-xl bg-slate-900 px-6 py-4 font-bold text-white shadow-xl hover:bg-black hover:shadow-2xl transition-all active:scale-[0.98] outline-none">
+                                    Commit Force Updates
                                 </button>
                             </form>
 
-                            <div className="mt-8 pt-8 border-t border-slate-100">
-                                <h3 className="text-xs font-bold text-red-600 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
-                                    <ExclamationTriangleIcon className="h-4 w-4" />
+                            <div className="p-6 sm:p-8 border-t border-slate-100 bg-red-50/30">
+                                <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                    <TrashIcon className="h-4 w-4" />
                                     Danger Zone
                                 </h3>
-                                <AdminDeleteGrievanceForm
-                                    grievanceId={grievance.id}
-                                    onDelete={adminDeleteGrievance}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Secondary Info */}
-                        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-5">
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Ownership Details</h3>
-                            <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
-                                    <UserIcon className="h-6 w-6" />
+                                <div className="text-center">
+                                    <AdminDeleteGrievanceForm
+                                        grievanceId={grievance.id}
+                                        onDelete={adminDeleteGrievance}
+                                    />
+                                    <p className="text-xs text-red-500/80 mt-3 font-medium">This action cannot be undone.</p>
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="text-sm font-bold text-slate-900 truncate">{grievance.citizen.name}</p>
-                                    <p className="text-xs text-slate-500 truncate">{grievance.citizen.email}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4 border-t border-slate-50 pt-5">
-                                <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
-                                    <MapPinIcon className="h-6 w-6" />
-                                </div>
-                                <p className="text-xs font-medium text-slate-600 leading-relaxed">
-                                    {grievance.address || "Digital Submission"}
-                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
+    );
+}
+
+function StatusBadge({ status }: { status: string }) {
+    const statusConfig: Record<string, { label: string; className: string }> = {
+        SUBMITTED: { label: "Submitted", className: "bg-blue-50 text-blue-700 ring-blue-600/20" },
+        ASSIGNED: { label: "Assigned", className: "bg-indigo-50 text-indigo-700 ring-indigo-600/20" },
+        IN_PROGRESS: { label: "In Progress", className: "bg-amber-50 text-amber-700 ring-amber-600/20" },
+        RESOLVED: { label: "Resolved", className: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" },
+        CLOSED: { label: "Closed", className: "bg-slate-100 text-slate-700 ring-slate-400/20" },
+        ESCALATED: { label: "Escalated", className: "bg-red-50 text-red-700 ring-red-600/20" },
+    };
+
+    const config = statusConfig[status] || statusConfig.SUBMITTED;
+
+    return (
+        <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset ${config.className}`}>
+            <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${config.className.split(' ')[1].replace('text', 'bg')}`}></span>
+            {config.label}
+        </span>
     );
 }

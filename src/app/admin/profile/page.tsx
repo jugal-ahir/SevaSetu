@@ -1,53 +1,216 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
-import { UserCircleIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import {
+    UserCircleIcon,
+    ShieldCheckIcon,
+    KeyIcon,
+    DevicePhoneMobileIcon,
+    EnvelopeIcon
+} from "@heroicons/react/24/outline";
 
-export default async function AdminProfile() {
-    const user = await getCurrentUser();
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
-    if (!user || user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
-        redirect("/login");
-    }
+export default function AdminProfile() {
+    const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [toggling2FA, setToggling2FA] = useState(false);
+
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const res = await fetch("/api/auth/me");
+                if (!res.ok) {
+                    router.push("/login");
+                    return;
+                }
+                const data = await res.json();
+                if (data.role !== "ADMIN" && data.role !== "SUPER_ADMIN") {
+                    router.push("/login");
+                    return;
+                }
+                setUser(data);
+            } catch (err) {
+                router.push("/login");
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchUser();
+    }, [router]);
+
+    const handleToggle2FA = async () => {
+        if (!user || toggling2FA) return;
+        setToggling2FA(true);
+        try {
+            const res = await fetch("/api/auth/2fa/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled: !user.twoFactorEnabled }),
+            });
+            if (res.ok) {
+                setUser({ ...user, twoFactorEnabled: !user.twoFactorEnabled });
+            }
+        } catch (err) {
+            console.error("Toggle 2FA error:", err);
+        } finally {
+            setToggling2FA(false);
+        }
+    };
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+    );
+    if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/30">
+            {/* Subtle background decoration */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute top-[0%] right-[0%] w-[50%] h-[50%] rounded-full bg-blue-100/30 blur-[120px]" />
+                <div className="absolute bottom-[0%] left-[0%] w-[50%] h-[50%] rounded-full bg-indigo-100/30 blur-[120px]" />
+            </div>
+
             <Navbar userRole={user.role} userName={user.name} />
 
-            <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">Administrative Profile</h1>
-                    <p className="mt-2 text-slate-600">Overview of your system privileges</p>
+                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                        My Identity
+                    </h1>
+                    <p className="text-lg text-slate-500 font-medium">
+                        Personal profile and system clearance levels
+                    </p>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-8 text-center">
-                        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white text-blue-600 shadow-lg">
-                            <UserCircleIcon className="h-16 w-16" />
-                        </div>
-                        <h2 className="mt-4 text-2xl font-bold text-white">{user.name}</h2>
-                        <p className="text-blue-100">{user.email}</p>
-                        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-100 backdrop-blur-sm">
-                            <ShieldCheckIcon className="h-4 w-4" />
-                            {user.role}
+                <div className="grid md:grid-cols-3 gap-6">
+                    {/* ID Card */}
+                    <div className="md:col-span-1">
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm overflow-hidden relative group">
+                            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600 to-indigo-600">
+                                <div className="absolute inset-0 bg-white/10 opacity-50 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                            </div>
+
+                            <div className="px-6 pb-8 pt-16 text-center relative z-10">
+                                <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-white text-blue-600 shadow-xl border-4 border-white relative group-hover:scale-105 transition-transform duration-500">
+                                    <UserCircleIcon className="h-24 w-24 text-slate-300" />
+                                    <div className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-emerald-500 border-2 border-white"></div>
+                                </div>
+
+                                <h2 className="mt-5 text-2xl font-heading font-black text-slate-900">{user.name}</h2>
+                                <p className="text-sm font-medium text-slate-500 mb-4">{user.email}</p>
+
+                                <div className="inline-flex flex-col gap-2 w-full">
+                                    <div className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-50 border border-blue-100 px-4 py-2 mt-2 w-full">
+                                        <ShieldCheckIcon className="h-4 w-4 text-blue-600" />
+                                        <span className="text-xs font-black uppercase tracking-widest text-blue-700">
+                                            {user.role?.replace(/_/g, " ")}
+                                        </span>
+                                    </div>
+                                    <div className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-2 w-full">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+                                            System Access Active
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="px-8 py-6">
-                        <div className="space-y-6">
-                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                <p className="text-xs font-medium text-slate-500 uppercase">System Role</p>
-                                <p className="font-semibold text-slate-900">{user.role.replace(/_/g, " ")}</p>
+                    {/* Details */}
+                    <div className="md:col-span-2 space-y-6">
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8">
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <KeyIcon className="h-5 w-5 text-slate-400" />
+                                Credentials & Contact
+                            </h3>
+
+                            <div className="space-y-6">
+                                <div className="group">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Full Legal Name</p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                            <UserCircleIcon className="h-5 w-5" />
+                                        </div>
+                                        <p className="font-bold text-slate-900 text-lg">{user.name}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid sm:grid-cols-2 gap-6">
+                                    <div className="group">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Registered Email</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                                <EnvelopeIcon className="h-5 w-5" />
+                                            </div>
+                                            <p className="font-bold text-slate-900">{user.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className="group">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Phone Number</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                                <DevicePhoneMobileIcon className="h-5 w-5" />
+                                            </div>
+                                            <p className="font-bold text-slate-900">{user.phone || "Not Provided"}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                <p className="text-xs font-medium text-slate-500 uppercase">Account Status</p>
-                                <p className="font-semibold text-green-600 font-bold">ACTIVE & VERIFIED</p>
+
+                            <div className="mt-8 pt-6 border-t border-slate-100">
+                                <p className="text-sm font-medium text-slate-500">
+                                    To update your name, email, or profile photo, please contact your system administrator or the IT department. Security protocols prevent direct modification of administrative accounts.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full pointer-events-none"></div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2 relative z-10">
+                                <ShieldCheckIcon className="h-5 w-5 text-slate-400" />
+                                Security Settings
+                            </h3>
+                            <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+                                <button
+                                    onClick={() => setIsPasswordModalOpen(true)}
+                                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white border border-slate-200 font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95"
+                                >
+                                    Change Password
+                                </button>
+                                <button
+                                    onClick={handleToggle2FA}
+                                    disabled={toggling2FA}
+                                    className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 ${user.twoFactorEnabled
+                                        ? "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                                        : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"}`}
+                                >
+                                    {toggling2FA ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        user.twoFactorEnabled ? "Disable 2FA Security" : "Enable 2FA Security"
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </main>
+
+            <ChangePasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+            />
         </div>
     );
 }

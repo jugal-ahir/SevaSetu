@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { PhotoIcon, MapPinIcon, SparklesIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon, MapPinIcon, SparklesIcon, CheckCircleIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export default function NewGrievancePage() {
     const router = useRouter();
@@ -25,6 +29,14 @@ export default function NewGrievancePage() {
     const [uploadProgress, setUploadProgress] = useState("");
     const [isScanning, setIsScanning] = useState(false);
     const [scanComplete, setScanComplete] = useState(false);
+    const [scanAnimationData, setScanAnimationData] = useState<any>(null);
+
+    useEffect(() => {
+        fetch("/sccan.json")
+            .then(res => res.json())
+            .then(data => setScanAnimationData(data))
+            .catch(err => console.error("Error loading scanning animation:", err));
+    }, []);
 
     const categories = [
         { value: "ROADS", label: "Roads & Infrastructure", subcategories: ["Potholes", "Street Lights", "Drainage"] },
@@ -174,29 +186,48 @@ export default function NewGrievancePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/30">
+            {/* Subtle background decoration */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute top-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-100/40 blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-indigo-100/40 blur-[100px]" />
+            </div>
+
             <Navbar userRole="CITIZEN" userName="Citizen" />
 
-            <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
+
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">Submit New Grievance</h1>
-                    <p className="mt-2 text-slate-600">Provide details about your issue for faster resolution</p>
+                    <Link href="/citizen/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors mb-4">
+                        <ArrowLeftIcon className="h-4 w-4" />
+                        Back to Dashboard
+                    </Link>
+                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                        Report Grievance
+                    </h1>
+                    <p className="text-lg text-slate-500 font-medium">
+                        Provide detailed information to help us resolve the issue faster.
+                    </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="rounded-3xl border border-slate-200/60 bg-white shadow-sm p-6 sm:p-10 transition-shadow">
+                    <form onSubmit={handleSubmit} className="space-y-8">
                         {error && (
-                            <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+                            <div className="rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700 border border-red-200/60 animate-slide-up">
                                 {error}
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Upload Image & AI Scan
+                        {/* AI Section (Bento Box style) */}
+                        <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/50 border border-slate-200/60 p-6 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-100/50 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-200/50 transition-colors"></div>
+
+                            <label className="block text-sm font-bold text-slate-900 mb-4 relative z-10">
+                                Step 1: Upload Image & Auto-fill Data
                             </label>
-                            <div className="flex flex-wrap items-center gap-4">
-                                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-4 text-sm font-bold text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50">
+
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10">
+                                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-4 text-sm font-bold text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50/50 shadow-sm w-full sm:w-auto min-w-[200px]">
                                     <PhotoIcon className="h-6 w-6 text-blue-500" />
                                     {imageFile ? "Change Image" : "Choose Image"}
                                     <input
@@ -215,168 +246,182 @@ export default function NewGrievancePage() {
                                         type="button"
                                         onClick={handleAIScan}
                                         disabled={isScanning}
-                                        className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 disabled:opacity-50"
+                                        className="flex items-center justify-center w-full sm:w-auto gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
                                     >
                                         <SparklesIcon className={`h-5 w-5 ${isScanning ? "animate-spin" : ""}`} />
-                                        {isScanning ? "Scanning..." : "Scan Image with AI"}
+                                        {isScanning ? "Analyzing..." : "Auto-Fill with AI"}
                                     </button>
                                 )}
 
                                 {scanComplete && (
-                                    <div className="flex items-center gap-2 rounded-xl bg-green-50 px-6 py-4 text-sm font-bold text-green-700 border border-green-100">
+                                    <div className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-emerald-50 px-6 py-4 text-sm font-bold text-emerald-700 border border-emerald-200 shadow-sm">
                                         <CheckCircleIcon className="h-5 w-5" />
-                                        AI Scan Successful!
+                                        AI Auto-Fill Completed
                                     </div>
                                 )}
                             </div>
                             {imageFile && (
-                                <p className="mt-2 text-xs text-slate-500 italic pl-1">Selected: {imageFile.name}</p>
+                                <p className="mt-3 text-sm font-medium text-slate-500 relative z-10 flex items-center gap-2">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                    {imageFile.name}
+                                </p>
                             )}
                         </div>
 
-                        <div className="pt-4 border-t border-slate-100">
-                            <label htmlFor="title" className="block text-sm font-medium text-slate-700">
-                                Title *
-                            </label>
-                            <input
-                                id="title"
-                                type="text"
-                                required
-                                minLength={5}
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="mt-2 block w-full rounded-lg border border-slate-300 bg-white py-3 px-4 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                placeholder="Brief summary of the issue"
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-slate-700">
-                                Description *
-                            </label>
-                            <textarea
-                                id="description"
-                                required
-                                minLength={10}
-                                rows={4}
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="mt-2 block w-full rounded-lg border border-slate-300 bg-white py-3 px-4 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                placeholder="Detailed description of the issue..."
-                            />
-                        </div>
-
-                        <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="grid gap-8 pt-4">
+                            {/* Basic Details */}
                             <div>
-                                <label htmlFor="category" className="block text-sm font-medium text-slate-700">
-                                    Category *
+                                <label htmlFor="title" className="block text-sm font-bold text-slate-900 mb-2">
+                                    Issue Title *
                                 </label>
-                                <select
-                                    id="category"
+                                <input
+                                    id="title"
+                                    type="text"
                                     required
-                                    value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: "" })}
-                                    className="mt-2 block w-full rounded-lg border border-slate-300 bg-white py-3 px-4 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                >
-                                    <option value="">Select category</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.value} value={cat.value}>
-                                            {cat.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    minLength={5}
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    className="block w-full rounded-xl border border-slate-200/60 bg-slate-50 py-3.5 px-4 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
+                                    placeholder="Brief summary of the issue (e.g. Large pothole on Main St)"
+                                />
                             </div>
 
                             <div>
-                                <label htmlFor="department" className="block text-sm font-medium text-slate-700">
-                                    Target Department *
+                                <label htmlFor="description" className="block text-sm font-bold text-slate-900 mb-2">
+                                    Detailed Description *
                                 </label>
-                                <select
-                                    id="department"
+                                <textarea
+                                    id="description"
                                     required
-                                    value={formData.departmentId}
-                                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                                    className="mt-2 block w-full rounded-lg border border-slate-300 bg-white py-3 px-4 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                >
-                                    <option value="">Select department</option>
-                                    {departments.map((dept) => (
-                                        <option key={dept.id} value={dept.id}>
-                                            {dept.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    minLength={10}
+                                    rows={5}
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    className="block w-full rounded-xl border border-slate-200/60 bg-slate-50 py-3.5 px-4 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium resize-none"
+                                    placeholder="Provide as much detail as possible to help the department understand the issue..."
+                                />
                             </div>
-                        </div>
 
-                        <div>
-                            <label htmlFor="subcategory" className="block text-sm font-medium text-slate-700">
-                                Subcategory
-                            </label>
-                            <select
-                                id="subcategory"
-                                value={formData.subcategory}
-                                onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                                disabled={!selectedCategory}
-                                className="mt-2 block w-full rounded-lg border border-slate-300 bg-white py-3 px-4 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100"
-                            >
-                                <option value="">Select subcategory</option>
-                                {selectedCategory?.subcategories.map((sub) => (
-                                    <option key={sub} value={sub}>
-                                        {sub}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                            <div className="grid gap-6 sm:grid-cols-2">
+                                <div>
+                                    <label htmlFor="category" className="block text-sm font-bold text-slate-900 mb-2">
+                                        Classification Category *
+                                    </label>
+                                    <select
+                                        id="category"
+                                        required
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: "" })}
+                                        className="block w-full rounded-xl border border-slate-200/60 bg-slate-50 py-3.5 px-4 text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium appearance-none"
+                                    >
+                                        <option value="">Select general category</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.value} value={cat.value}>
+                                                {cat.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                        <div>
-                            <label htmlFor="address" className="block text-sm font-medium text-slate-700">
-                                Address *
-                            </label>
-                            <input
-                                id="address"
-                                type="text"
-                                required
-                                value={formData.address}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                className="mt-2 block w-full rounded-lg border border-slate-300 bg-white py-3 px-4 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                placeholder="Street address or landmark"
-                            />
-                        </div>
+                                <div>
+                                    <label htmlFor="department" className="block text-sm font-bold text-slate-900 mb-2">
+                                        Assigned Department *
+                                    </label>
+                                    <select
+                                        id="department"
+                                        required
+                                        value={formData.departmentId}
+                                        onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                                        className="block w-full rounded-xl border border-slate-200/60 bg-slate-50 py-3.5 px-4 text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium appearance-none"
+                                    >
+                                        <option value="">Select target department</option>
+                                        {departments.map((dept) => (
+                                            <option key={dept.id} value={dept.id}>
+                                                {dept.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Location Coordinates
-                            </label>
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={detectLocation}
-                                    disabled={detectingLocation}
-                                    className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50 disabled:opacity-50"
-                                >
-                                    <MapPinIcon className="h-5 w-5" />
-                                    {detectingLocation ? "Detecting..." : "Auto-Detect Location"}
-                                </button>
+                                <div>
+                                    <label htmlFor="subcategory" className="block text-sm font-bold text-slate-900 mb-2">
+                                        Specific Subcategory
+                                    </label>
+                                    <select
+                                        id="subcategory"
+                                        value={formData.subcategory}
+                                        onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+                                        disabled={!selectedCategory}
+                                        className="block w-full rounded-xl border border-slate-200/60 bg-slate-50 py-3.5 px-4 text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium appearance-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                                    >
+                                        <option value="">Select detailed issue type</option>
+                                        {selectedCategory?.subcategories.map((sub) => (
+                                            <option key={sub} value={sub}>
+                                                {sub}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="my-2 border-t border-slate-100"></div>
+
+                            {/* Location Section */}
+                            <div>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                                    <label htmlFor="address" className="block text-sm font-bold text-slate-900/90">
+                                        Incident Address / Location *
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={detectLocation}
+                                        disabled={detectingLocation}
+                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/60 bg-white px-4 py-2 text-xs font-bold text-blue-600 transition-all hover:bg-slate-50 hover:border-blue-200 hover:shadow-sm disabled:opacity-50"
+                                    >
+                                        <MapPinIcon className="h-4 w-4" />
+                                        {detectingLocation ? "Detecting..." : "Auto-Detect Full GPS"}
+                                    </button>
+                                </div>
+                                <input
+                                    id="address"
+                                    type="text"
+                                    required
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                    className="block w-full rounded-xl border border-slate-200/60 bg-slate-50 py-3.5 px-4 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
+                                    placeholder="Enter street address, nearby landmark, etc."
+                                />
+
                                 {formData.latitude && formData.longitude && (
-                                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                                        <span>📍 {parseFloat(formData.latitude).toFixed(4)}, {parseFloat(formData.longitude).toFixed(4)}</span>
+                                    <div className="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 w-max px-3 py-1.5 rounded-lg border border-emerald-100">
+                                        <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        GPS Locked: {parseFloat(formData.latitude).toFixed(5)}, {parseFloat(formData.longitude).toFixed(5)}
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex gap-4 pt-8">
+                        <div className="flex flex-col sm:flex-row gap-4 pt-8 mt-8 border-t border-slate-100">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 font-bold tracking-wide text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed group relative overflow-hidden"
                             >
-                                {loading ? uploadProgress || "Submitting..." : "Submit Grievance"}
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    {loading ? (
+                                        <>
+                                            <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                                            {uploadProgress || "Submitting Request..."}
+                                        </>
+                                    ) : (
+                                        "Submit Grievance Report"
+                                    )}
+                                </span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="rounded-lg border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50"
+                                className="rounded-xl border border-slate-200/60 bg-white px-8 py-4 font-bold text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
                             >
                                 Cancel
                             </button>
@@ -387,21 +432,47 @@ export default function NewGrievancePage() {
 
             {/* Scanning Animation Overlay */}
             {isScanning && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
-                    <div className="relative h-80 w-80 overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl ring-1 ring-white/20">
-                        <div className="animate-scan" />
-                        <div className="flex h-full flex-col items-center justify-center space-y-6">
-                            <div className="relative">
-                                <SparklesIcon className="h-16 w-16 text-blue-500 animate-pulse" />
-                                <div className="absolute -inset-4 rounded-full border border-blue-100 animate-ping opacity-25" />
-                            </div>
-                            <div className="text-center">
-                                <p className="text-lg font-black text-slate-900 uppercase tracking-[0.2em]">AI Scanning</p>
-                                <p className="text-sm text-slate-500 mt-2 font-medium">Analyzing image content...</p>
-                            </div>
-                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                <div className="bg-blue-500 h-full animate-progress" />
-                            </div>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-xl overflow-hidden">
+                    {/* Ambient Particles */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(20)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="particle"
+                                style={{
+                                    left: `${(i * 7) % 100}%`,
+                                    top: `${(i * 13) % 100}%`,
+                                    width: `${((i % 3) + 1) * 2}px`,
+                                    height: `${((i % 3) + 1) * 2}px`,
+                                    opacity: 0.3,
+                                    animationDelay: `${i * 0.2}s`,
+                                } as any}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="relative h-96 w-96 flex items-center justify-center">
+                        {/* Lottie Animation */}
+                        <div className="w-full h-full relative z-10">
+                            {scanAnimationData && (
+                                <Lottie
+                                    animationData={scanAnimationData}
+                                    loop={true}
+                                    className="w-full h-full text-blue-400"
+                                />
+                            )}
+                        </div>
+
+
+
+                        {/* Text Overlay */}
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-center w-full">
+                            <h1 className="text-xl font-heading font-black text-white uppercase tracking-[0.4em] animate-pulse">
+                                AI Scanning
+                            </h1>
+                            <p className="text-[10px] font-mono text-blue-400 opacity-60 mt-1 uppercase tracking-widest">
+                                Analyzing visual markers...
+                            </p>
                         </div>
                     </div>
                 </div>

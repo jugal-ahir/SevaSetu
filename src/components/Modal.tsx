@@ -42,9 +42,9 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
                     <h3 className="text-xl font-bold text-slate-900">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                        className="group flex items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-red-500 text-slate-400 hover:text-white transition-all shadow-sm ring-2 ring-transparent hover:ring-red-200"
                     >
-                        <XMarkIcon className="h-6 w-6" />
+                        <XMarkIcon className="h-5 w-5 group-hover:scale-110 group-hover:rotate-90 transition-transform duration-300" />
                     </button>
                 </div>
 

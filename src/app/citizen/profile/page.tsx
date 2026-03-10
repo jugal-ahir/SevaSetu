@@ -1,83 +1,196 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { UserCircleIcon, PhoneIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, PhoneIcon, CheckBadgeIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
-export default async function CitizenProfile() {
-    const user = await getCurrentUser();
+export default function CitizenProfile() {
+    const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [toggling2FA, setToggling2FA] = useState(false);
 
-    if (!user || user.role !== "CITIZEN") {
-        redirect("/login");
-    }
-
-    const citizen = await prisma.user.findUnique({
-        where: { id: user.id },
-        include: {
-            _count: {
-                select: { grievances: true }
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const res = await fetch("/api/auth/me?full=true");
+                if (!res.ok) {
+                    router.push("/login");
+                    return;
+                }
+                const data = await res.json();
+                if (data.role !== "CITIZEN") {
+                    router.push("/login");
+                    return;
+                }
+                setUser(data);
+            } catch (err) {
+                router.push("/login");
+            } finally {
+                setLoading(false);
             }
         }
-    });
+        fetchUser();
+    }, [router]);
 
-    if (!citizen) return null;
+    const handleToggle2FA = async () => {
+        if (!user || toggling2FA) return;
+        setToggling2FA(true);
+        try {
+            const res = await fetch("/api/auth/2fa/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled: !user.twoFactorEnabled }),
+            });
+            if (res.ok) {
+                setUser({ ...user, twoFactorEnabled: !user.twoFactorEnabled });
+            }
+        } catch (err) {
+            console.error("Toggle 2FA error:", err);
+        } finally {
+            setToggling2FA(false);
+        }
+    };
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+    );
+    if (!user) return null;
 
     return (
         <div className="min-h-screen bg-slate-50">
             <Navbar userRole="CITIZEN" userName={user.name} />
 
-            <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">My Profile</h1>
-                    <p className="mt-2 text-slate-600">Manage your personal information</p>
+                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                        Citizen Identity
+                    </h1>
+                    <p className="text-lg text-slate-500 font-medium">
+                        Secure personal dashboard and verified credentials
+                    </p>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-8 text-center">
-                        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white text-blue-600 shadow-lg">
-                            <UserCircleIcon className="h-16 w-16" />
-                        </div>
-                        <h2 className="mt-4 text-2xl font-bold text-white">{citizen.name}</h2>
-                        <p className="text-blue-100">{citizen.email}</p>
-                        {citizen.isVerified && (
-                            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-xs font-semibold text-green-100 backdrop-blur-sm">
-                                <CheckBadgeIcon className="h-4 w-4" />
-                                Verified Citizen
+                <div className="grid md:grid-cols-3 gap-6">
+                    {/* ID Card */}
+                    <div className="md:col-span-1">
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm overflow-hidden relative group">
+                            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600 to-indigo-600">
+                                <div className="absolute inset-0 bg-white/10 opacity-50 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
                             </div>
-                        )}
+
+                            <div className="px-6 pb-8 pt-16 text-center relative z-10">
+                                <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-white text-blue-600 shadow-xl border-4 border-white relative group-hover:scale-105 transition-transform duration-500">
+                                    <UserCircleIcon className="h-24 w-24 text-slate-300" />
+                                    {user.isVerified && (
+                                        <div className="absolute bottom-1 right-1 h-6 w-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
+                                            <CheckBadgeIcon className="h-3.5 w-3.5 text-white" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <h2 className="mt-5 text-2xl font-heading font-black text-slate-900">{user.name}</h2>
+                                <p className="text-sm font-medium text-slate-500 mb-4">{user.email}</p>
+
+                                <div className="inline-flex flex-col gap-2 w-full">
+                                    <div className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-50 border border-blue-100 px-4 py-2 mt-2 w-full">
+                                        <UserCircleIcon className="h-4 w-4 text-blue-600" />
+                                        <span className="text-xs font-black uppercase tracking-widest text-blue-700">
+                                            CITIZEN
+                                        </span>
+                                    </div>
+                                    {user.isVerified && (
+                                        <div className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-2 w-full">
+                                            <CheckBadgeIcon className="h-4 w-4 text-emerald-600" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+                                                Verified Citizen
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="px-8 py-6">
-                        <div className="grid gap-6 sm:grid-cols-1">
-                            {citizen.phone && (
-                                <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
-                                            <PhoneIcon className="h-5 w-5" />
+                    {/* Details */}
+                    <div className="md:col-span-2 space-y-6">
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8">
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <UserCircleIcon className="h-5 w-5 text-slate-400" />
+                                Personal Information
+                            </h3>
+
+                            <div className="space-y-6">
+                                <div className="group">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Official Name</p>
+                                    <p className="font-bold text-slate-900 text-lg">{user.name}</p>
+                                </div>
+
+                                <div className="grid sm:grid-cols-2 gap-6">
+                                    <div className="group">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Phone Number</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                                <PhoneIcon className="h-5 w-5" />
+                                            </div>
+                                            <p className="font-bold text-slate-900">{user.phone || "Not Linked"}</p>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-medium text-slate-500 uppercase">Phone Number</p>
-                                            <p className="font-semibold text-slate-900">{citizen.phone}</p>
+                                    </div>
+                                    <div className="group">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Contribution</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                                <CheckBadgeIcon className="h-5 w-5" />
+                                            </div>
+                                            <p className="font-bold text-slate-900">{user._count?.grievances || 0} Grievances</p>
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        </div>
 
-                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-medium text-slate-500 uppercase">Total Grievances Submitted</p>
-                                        <p className="text-2xl font-bold text-slate-900">{citizen._count.grievances}</p>
-                                    </div>
-                                    <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
-                                        <UserCircleIcon className="h-8 w-8" />
-                                    </div>
-                                </div>
+                        <div className="rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm p-6 sm:p-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full pointer-events-none"></div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2 relative z-10">
+                                <CheckBadgeIcon className="h-5 w-5 text-slate-400" />
+                                Secure Access
+                            </h3>
+                            <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+                                <button
+                                    onClick={() => setIsPasswordModalOpen(true)}
+                                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white border border-slate-200 font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95"
+                                >
+                                    Change Password
+                                </button>
+                                <button
+                                    onClick={handleToggle2FA}
+                                    disabled={toggling2FA}
+                                    className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 ${user.twoFactorEnabled
+                                        ? "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                                        : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"}`}
+                                >
+                                    {toggling2FA ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        user.twoFactorEnabled ? "Disable 2FA Security" : "Enable 2FA Security"
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </main>
+
+            <ChangePasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+            />
         </div>
     );
 }

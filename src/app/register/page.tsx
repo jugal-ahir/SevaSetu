@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EnvelopeIcon, LockClosedIcon, UserIcon, PhoneIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, LockClosedIcon, UserIcon, PhoneIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -61,149 +61,204 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12">
-            <div className="w-full max-w-md">
-                {/* Logo */}
-                <div className="mb-10 text-center flex flex-col items-center">
-                    <Link href="/" className="inline-flex flex-col items-center gap-4 group">
-                        <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-white shadow-2xl shadow-slate-200/50 transition-all p-3 relative overflow-hidden ring-1 ring-slate-100">
+        <div className="min-h-screen bg-slate-50 flex selection:bg-indigo-500/30">
+            {/* Left Side: Visual / Brand */}
+            <div className="hidden lg:flex lg:w-[45%] relative flex-col justify-between p-8 xl:p-12 overflow-hidden border-r border-slate-200/60 bg-white">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50/50 z-0"></div>
+                <div className="absolute top-[-10%] right-[-20%] w-[80%] h-[80%] rounded-full bg-indigo-500/10 blur-[130px] mix-blend-multiply pointer-events-none" />
+                <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-purple-500/10 blur-[100px] mix-blend-multiply pointer-events-none" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none"></div>
+
+                <div className="relative z-10 w-full animate-fade-in">
+                    <Link href="/" className="inline-flex items-center gap-3 group">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-xl shadow-indigo-500/10 transition-transform duration-500 group-hover:scale-105 p-2 ring-1 ring-slate-100 border border-slate-50">
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
                                 alt="National Emblem of India"
-                                className="h-full w-full object-contain transition-all duration-700 hover:brightness-110"
+                                className="h-full w-full object-contain"
                             />
                         </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-sm font-black tracking-[0.3em] text-slate-900 uppercase">Government of India</span>
-                            <div className="mt-1 h-0.5 w-12 bg-gradient-to-r from-orange-400 via-white to-green-500"></div>
-                        </div>
+                        <span className="text-2xl font-heading font-black tracking-tight text-slate-900 leading-none">SevaSetu</span>
                     </Link>
-                    <h1 className="mt-10 text-3xl font-black tracking-tight text-slate-900">Create Account</h1>
-                    <p className="mt-2 text-sm font-medium text-slate-500 uppercase tracking-widest">Citizen Registration Portal</p>
                 </div>
 
-                {/* Register Form */}
-                <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        {error && (
-                            <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-                                {error}
-                            </div>
-                        )}
+                <div className="relative z-10 mb-20 animate-fade-in" style={{ animationDelay: "100ms" }}>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-indigo-600 text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
+                        Citizen Portal
+                    </div>
+                    <h2 className="text-4xl font-heading font-black text-slate-900 leading-[1.2] mb-6">
+                        Join the future of <br /> civic engagement.
+                    </h2>
+                    <p className="text-lg text-slate-500 font-medium max-w-lg">
+                        Create an account to report issues instantly, track resolution progress in real-time, and help build a better community.
+                    </p>
+                </div>
 
-                        <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-slate-700">
-                                Full Name
-                            </label>
-                            <div className="relative mt-2">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <UserIcon className="h-5 w-5 text-slate-400" />
+                <div className="relative z-10 flex items-center gap-4 text-sm font-medium text-slate-400">
+                    <span>© {new Date().getFullYear()} SevaSetu</span>
+                    <span>•</span>
+                    <a href="#" className="hover:text-slate-600 transition-colors">Help Center</a>
+                </div>
+            </div>
+
+            {/* Right Side: Form */}
+            <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative overflow-y-auto bg-slate-50">
+                {/* Mobile Background Elements */}
+                <div className="absolute top-0 right-0 w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[100px] mix-blend-multiply pointer-events-none lg:hidden" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] mix-blend-overlay pointer-events-none lg:hidden"></div>
+
+                <div className="w-full max-w-md relative z-10 py-12 lg:py-0">
+                    <div className="text-center lg:text-left mb-8">
+                        {/* Mobile Logo */}
+                        <div className="lg:hidden flex justify-center mb-8">
+                            <Link href="/" className="inline-flex items-center gap-3">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-xl shadow-indigo-500/10 p-2 ring-1 ring-slate-100 border border-slate-50">
+                                    <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                                        alt="National Emblem of India"
+                                        className="h-full w-full object-contain"
+                                    />
                                 </div>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="block w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                    placeholder="John Doe"
-                                />
-                            </div>
+                            </Link>
                         </div>
 
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-                                Email Address
-                            </label>
-                            <div className="relative mt-2">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <EnvelopeIcon className="h-5 w-5 text-slate-400" />
+                        <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight mb-2">Create Account</h1>
+                        <p className="text-slate-500 text-sm">Fill in your details to get started.</p>
+                    </div>
+
+                    <div className="rounded-3xl border border-white bg-white/60 backdrop-blur-xl p-8 shadow-xl shadow-slate-200/50">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {error && (
+                                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-medium text-red-600 animate-slide-up">
+                                    {error}
                                 </div>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="block w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                    placeholder="you@example.com"
-                                />
-                            </div>
-                        </div>
+                            )}
 
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
-                                Phone Number (Optional)
-                            </label>
-                            <div className="relative mt-2">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <PhoneIcon className="h-5 w-5 text-slate-400" />
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Full Name
+                                </label>
+                                <div className="relative">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                        <UserIcon className="h-5 w-5 text-slate-400" />
+                                    </div>
+                                    <input
+                                        id="name"
+                                        type="text"
+                                        required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="block w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
+                                        placeholder="John Doe"
+                                    />
                                 </div>
-                                <input
-                                    id="phone"
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    className="block w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                    placeholder="+91 98765 43210"
-                                />
                             </div>
-                        </div>
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                                Password
-                            </label>
-                            <div className="relative mt-2">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Email Address
+                                </label>
+                                <div className="relative">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                        <EnvelopeIcon className="h-5 w-5 text-slate-400" />
+                                    </div>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        required
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="block w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
+                                        placeholder="you@example.com"
+                                    />
                                 </div>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    required
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="block w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                    placeholder="••••••••"
-                                />
                             </div>
-                        </div>
 
-                        <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
-                                Confirm Password
-                            </label>
-                            <div className="relative mt-2">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                            <div>
+                                <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
+                                </label>
+                                <div className="relative">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                        <PhoneIcon className="h-5 w-5 text-slate-400" />
+                                    </div>
+                                    <input
+                                        id="phone"
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        className="block w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
+                                        placeholder="+91 98765 43210"
+                                    />
                                 </div>
-                                <input
-                                    id="confirmPassword"
-                                    type="password"
-                                    required
-                                    value={formData.confirmPassword}
-                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    className="block w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                    placeholder="••••••••"
-                                />
                             </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
+                                        Password
+                                    </label>
+                                    <div className="relative">
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                            <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                                        </div>
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            required
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            className="block w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-700 mb-2">
+                                        Confirm
+                                    </label>
+                                    <div className="relative">
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                            <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                                        </div>
+                                        <input
+                                            id="confirmPassword"
+                                            type="password"
+                                            required
+                                            value={formData.confirmPassword}
+                                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                            className="block w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="group w-full rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3.5 font-bold text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-6 flex items-center justify-center gap-2"
+                            >
+                                {loading ? (
+                                    <span className="flex items-center gap-2">
+                                        <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                                        Registering...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        Create Account <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </span>
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="mt-8 text-center text-sm font-medium">
+                            <span className="text-slate-500">Already have an account? </span>
+                            <Link href="/login" className="text-indigo-600 hover:text-indigo-700 transition-colors underline decoration-indigo-600/30 underline-offset-4 font-bold">
+                                Sign in here
+                            </Link>
                         </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? "Creating Account..." : "Create Account"}
-                        </button>
-                    </form>
-
-                    <div className="mt-6 text-center text-sm">
-                        <span className="text-slate-600">Already have an account? </span>
-                        <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
-                            Sign in
-                        </Link>
                     </div>
                 </div>
             </div>

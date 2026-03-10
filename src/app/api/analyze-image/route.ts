@@ -37,16 +37,41 @@ export async function POST(req: Request) {
                 for (const modelName of models) {
                     try {
                         const model = genAI.getGenerativeModel({ model: modelName });
-                        const prompt = `Analyze this urban maintenance image. 
-                        Rules:
-                        1. NO meta-talk (Do NOT start with "The image shows" or "This is a photo of").
-                        2. Start description DIRECTLY with the problem and its impact.
-                        3. CATEGORY RULES:
-                           - Water Logging/Flooding -> Category: SANITATION, Subcategory: Drainage
-                           - Potholes/Road Damage -> Category: ROADS, Subcategory: Potholes
-                           - Garbage/Trash -> Category: SANITATION, Subcategory: Garbage Collection
-                           - Street Lights -> Category: ELECTRICITY, Subcategory: Street Lights
-                        Return JSON ONLY: { "title": "...", "description": "...", "category": "ROADS|WATER|SANITATION|ELECTRICITY|OTHER", "subcategory": "...", "priority": "LOW|NORMAL|HIGH|URGENT" }.`;
+                        const prompt = `Act as a Senior Urban Infrastructure Auditor and Disaster Management Expert. Analyze the provided image to diagnose civic maintenance failures or public hazards with maximum technical precision.
+
+                        ### CORE DIRECTIVES:
+                        1. **Tone**: Objective, professional, and strictly technical. No conversational fillers.
+                        2. **Format**: Return EXCLUSIVELY valid JSON. No markdown backticks, no wrap-around text.
+                        3. **Auto-Fill Requirement**: Every field must be populated with high-quality, actionable data.
+
+                        ### AUDIT PARAMETERS:
+                        - **Title**: A concise, impactful headline (Max 8 words). Use professional terminology (e.g., "Critical Asphalt Subsidence" instead of "Big Pothole").
+                        - **Description**: 
+                            - Start IMMEDIATELY with the primary structural or service failure.
+                            - Quantify the scale (e.g., "Approx. 2-meter diameter", "Widespread accumulation").
+                            - Detail the hazard: Obstruction to mobility, safety risks to vehicles/pedestrians, public hygiene impact, or environmental degradation.
+                            - Mention specific infrastructure elements involved (e.g., MH-type drainage, bituminous road surface, electrical transformer).
+                        - **Category Mapping**:
+                            - **ROADS**: Potholes, cracks, surface wear, divider damage, missing manhole covers on roads.
+                            - **SANITATION**: Garbage piles, drainage overflow, blocked gutters, animal carcasses, sewage leaks.
+                            - **WATER**: Pipe bursts, visible leakages from municipal lines, standing water/flooding hazards.
+                            - **ELECTRICITY**: Bare wires, sparking equipment, leaning poles, non-functional streetlights, transformer issues.
+                            - **OTHER**: Anything not fitting the above (e.g., illegal construction, damaged public property).
+                        - **Subcategory**: Be specific (e.g., "Secondary Drain Blockage", "Pothole Type A", "Low-Voltage Cable Exposure").
+                        - **Priority Logic**:
+                            - **URGENT**: Existential threat to life/property (Live high-tension wires, deep open pits in traffic, structural collapse).
+                            - **HIGH**: Significant safety/operational risk (Potholes on main roads, total streetlight outage in alleys, minor flooding).
+                            - **NORMAL**: Standard maintenance backlog (Litter, small cracks, minor leakages).
+                            - **LOW**: Minor cosmetic issues or early indicators of wear.
+
+                        ### JSON SCHEMA:
+                        {
+                          "title": "Precise Audit Headline",
+                          "description": "Comprehensive technical description of the failure and its impact.",
+                          "category": "ROADS | WATER | SANITATION | ELECTRICITY | OTHER",
+                          "subcategory": "Specific system identification",
+                          "priority": "LOW | NORMAL | HIGH | URGENT"
+                        }`;
 
                         const result = await model.generateContent([
                             prompt,
@@ -83,13 +108,16 @@ export async function POST(req: Request) {
                             content: [
                                 {
                                     type: "text",
-                                    text: `Analyze this image for urban infrastructure issues.
+                                    text: `Act as a Senior Urban Infrastructure Auditor. Analyze this image to identify civic maintenance failures with high precision.
+                                    
                                     RULES:
-                                    1. START description DIRECTLY (e.g., "Severe water accumulation..."). 
-                                    2. NO phrases like "The image shows".
-                                    3. CATEGORY RULES:
-                                       - Water Logging/Flooding -> Category: SANITATION, Subcategory: Drainage
-                                    Return JSON ONLY: { "title": "...", "description": "...", "category": "ROADS|WATER|SANITATION|ELECTRICITY|OTHER", "subcategory": "...", "priority": "LOW|NORMAL|HIGH|URGENT" }.`
+                                    1. JSON ONLY. No markdown, no pre-amble.
+                                    2. TONE: Objective, professional.
+                                    3. CATEGORY: ROADS, SANITATION, WATER, ELECTRICITY, OTHER.
+                                    4. PRIORITY: LOW, NORMAL, HIGH, URGENT based on public safety risk.
+                                    5. AUTO-FILL: Ensure "title", "description", "category", "subcategory", and "priority" are all technically descriptive.
+                                    
+                                    Example Output: {"title": "Structural Asphalt Failure", "description": "Large pothole (1m) on high-traffic road posing safety risk.", "category": "ROADS", "subcategory": "Potholes", "priority": "HIGH"}`
                                 },
                                 {
                                     type: "image_url",

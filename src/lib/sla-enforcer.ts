@@ -52,19 +52,24 @@ export async function enforceSla() {
                 }
             });
 
-            // Notify Department Head
+            // Notify Stakeholders (All Dept Heads for this dept + All Admins)
             if (g.departmentId) {
-                const dept = await prisma.department.findUnique({
-                    where: { id: g.departmentId },
-                    select: { headId: true }
+                const recipients = await prisma.user.findMany({
+                    where: {
+                        OR: [
+                            { departmentId: g.departmentId, role: "DEPT_HEAD" },
+                            { role: { in: ["ADMIN", "SUPER_ADMIN"] } }
+                        ]
+                    },
+                    select: { id: true }
                 });
 
-                if (dept?.headId) {
+                for (const recipient of recipients) {
                     await prisma.notification.create({
                         data: {
-                            userId: dept.headId,
-                            title: "SLA BREACH ALERT!",
-                            message: `Grievance "${g.title}" has breached its SLA and is now ESCALATED.`,
+                            userId: recipient.id,
+                            title: "🚨 SLA BREACH ALERT!",
+                            message: `Grievance #${g.id.substring(0, 8)} ("${g.title}") has breached its SLA and is now ESCALATED.`,
                             type: "URGENT",
                             grievanceId: g.id
                         }

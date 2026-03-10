@@ -82,7 +82,7 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
     if (!vehicleIcon) return null;
 
     return (
-        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl ring-1 ring-slate-200">
+        <div className="relative h-full w-full overflow-hidden bg-slate-100">
             <div className="absolute top-6 left-6 z-[1000] rounded-2xl bg-white px-5 py-3 shadow-xl border border-slate-100 ring-4 ring-slate-50">
                 <div className="flex items-center gap-3">
                     <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />

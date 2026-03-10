@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface Department {
@@ -16,6 +17,11 @@ interface SlaRuleFormProps {
 export default function SlaRuleForm({ departments, createSlaRuleAction }: SlaRuleFormProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     async function handleSubmit(formData: FormData) {
         const value = parseInt(formData.get("durationValue") as string);
@@ -43,16 +49,16 @@ export default function SlaRuleForm({ departments, createSlaRuleAction }: SlaRul
                 New Rule
             </button>
 
-            {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            {mounted && isOpen && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
                     <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
                             <h2 className="text-xl font-bold text-slate-900">Define SLA Rule</h2>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="rounded-xl bg-slate-100 p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                className="group flex items-center justify-center p-2 rounded-xl bg-slate-50 hover:bg-red-500 text-slate-400 hover:text-white transition-all shadow-sm ring-2 ring-transparent hover:ring-red-200"
                             >
-                                <XMarkIcon className="h-6 w-6" />
+                                <XMarkIcon className="h-5 w-5 group-hover:scale-110 group-hover:rotate-90 transition-transform duration-300" />
                             </button>
                         </div>
 
@@ -145,7 +151,8 @@ export default function SlaRuleForm({ departments, createSlaRuleAction }: SlaRul
                             </button>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

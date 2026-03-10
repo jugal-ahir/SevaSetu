@@ -38,6 +38,31 @@ export async function POST(req: Request) {
             );
         }
 
+        // Check for 2FA
+        if (user.twoFactorEnabled) {
+            // Generate a 6-digit OTP
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Store the OTP temporarily in the database safely
+            // For now, using twoFactorSecret as a temp storage for demonstration
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { twoFactorSecret: otp }
+            });
+
+            // LOG OTP TO TERMINAL FOR THE USER
+            console.log("\n" + "=".repeat(40));
+            console.log(`🔐 2FA VERIFICATION CODE FOR ${user.email}:`);
+            console.log(`👉 CODE: ${otp}`);
+            console.log("=".repeat(40) + "\n");
+
+            return NextResponse.json({
+                requires2FA: true,
+                userId: user.id,
+                email: user.email
+            });
+        }
+
         const token = await createAuthToken({
             sub: user.id,
             email: user.email,

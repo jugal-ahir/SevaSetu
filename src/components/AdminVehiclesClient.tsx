@@ -124,18 +124,29 @@ export default function AdminVehiclesClient({
 
             {/* Tracking Modal */}
             {trackingVehicle && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-4xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
-                        <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
-                            <div>
-                                <h2 className="text-xl font-bold text-slate-900">Fleet Surveillance</h2>
-                                <p className="text-sm font-medium text-slate-500">{trackingVehicle.registrationNumber}</p>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 sm:p-8 animate-fade-in">
+                    <div className="relative w-full h-full max-w-7xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl flex flex-col">
+                        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 py-4 sm:px-8 sm:py-6 bg-slate-50/80 backdrop-blur-md z-10 relative">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 rounded-2xl bg-blue-100 text-blue-600 shadow-inner">
+                                    <MapIcon className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl sm:text-2xl font-heading font-black text-slate-900">Fleet Surveillance</h2>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{trackingVehicle.registrationNumber}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <button onClick={() => setTrackingVehicle(null)} className="rounded-xl bg-red-50 p-2 text-red-600">
-                                <XMarkIcon className="h-6 w-6" />
+                            <button
+                                onClick={() => setTrackingVehicle(null)}
+                                className="group flex items-center justify-center p-3 rounded-2xl bg-slate-100 hover:bg-red-500 text-slate-500 hover:text-white transition-all shadow-sm ring-2 ring-transparent hover:ring-red-200"
+                            >
+                                <XMarkIcon className="h-6 w-6 group-hover:scale-110 group-hover:rotate-90 transition-transform duration-300" />
                             </button>
                         </div>
-                        <div className="h-[500px] w-full p-4">
+                        <div className="flex-1 w-full relative bg-slate-100">
                             <LiveVehicleMap vehicleName={trackingVehicle.registrationNumber} />
                         </div>
                     </div>
