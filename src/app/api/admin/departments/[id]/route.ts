@@ -17,23 +17,29 @@ export async function PATCH(
         const body = await req.json();
         const { name, description, headId } = body;
 
-        const updatedDept = await prisma.department.update({
-            where: { id },
-            data: {
-                name,
-                description,
-                headId: headId || null,
-            },
-        });
-
-        // If a head is assigned, ensure they have at least DEPT_HEAD role?
-        // Optional logic: if headId is set, upgrade user role to DEPT_HEAD if they are just OFFICER
-        if (headId) {
-            await prisma.user.update({
-                where: { id: headId },
-                data: { role: "DEPT_HEAD" }
+        const updatedDept = await prisma.$transaction(async (tx) => {
+            const dept = await tx.department.update({
+                where: { id },
+                data: {
+                    name,
+                    description,
+                    headId: headId || null,
+                },
             });
-        }
+
+            if (headId) {
+                // Update the user's role and ENSURE their departmentId matches
+                await tx.user.update({
+                    where: { id: headId },
+                    data: { 
+                        role: "DEPT_HEAD",
+                        departmentId: id 
+                    }
+                });
+            }
+
+            return dept;
+        });
 
         return NextResponse.json(updatedDept);
     } catch (error: any) {

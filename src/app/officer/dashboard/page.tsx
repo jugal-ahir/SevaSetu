@@ -147,7 +147,7 @@ export default async function OfficerDashboard() {
                                 return (
                                     <Link
                                         key={grievance.id}
-                                        href={`/officer/cases/${grievance.id}`}
+                                        href={`/officer/grievances/${grievance.id}`}
                                         className={`group block rounded-2xl border ${isOverdue ? 'border-red-200 bg-red-50/30' : 'border-slate-200/60 bg-white'} p-5 transition-all hover:-translate-y-1 hover:shadow-lg ${isOverdue ? 'hover:border-red-300 hover:shadow-red-500/10' : 'hover:border-blue-300 hover:shadow-blue-500/10'} relative overflow-hidden`}
                                     >
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>

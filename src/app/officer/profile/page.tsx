@@ -17,7 +17,7 @@ export default function OfficerProfile() {
         async function fetchUser() {
             try {
                 // We use a custom endpoint to get full officer details
-                const res = await fetch("/api/auth/me?full=true");
+                const res = await fetch(`/api/auth/me?full=true&t=${Date.now()}`);
                 if (!res.ok) {
                     router.push("/login");
                     return;

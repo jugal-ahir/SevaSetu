@@ -16,7 +16,7 @@ export default function DeptHeadProfile() {
     useEffect(() => {
         async function fetchUser() {
             try {
-                const res = await fetch("/api/auth/me?full=true");
+                const res = await fetch(`/api/auth/me?full=true&t=${Date.now()}`);
                 if (!res.ok) {
                     router.push("/login");
                     return;

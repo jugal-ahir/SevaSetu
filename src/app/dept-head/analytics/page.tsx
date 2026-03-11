@@ -3,11 +3,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import {
-    ChartPieIcon,
-    TagIcon,
-    MapPinIcon,
-    ArrowTrendingUpIcon
+    ChartBarIcon,
+    PresentationChartLineIcon
 } from "@heroicons/react/24/outline";
+import KPIStats from "./KPIStats";
+import AnalyticsCharts from "./AnalyticsCharts";
 
 export default async function DeptHeadAnalytics() {
     const user = await getCurrentUser();
@@ -28,25 +28,71 @@ export default async function DeptHeadAnalytics() {
         by: ["category"],
         where: { departmentId: user.departmentId },
         _count: { id: true },
+        orderBy: { _count: { id: "desc" } }
     });
 
-    // Group by Region
-    const regionStats = await prisma.grievance.groupBy({
-        by: ["regionId"],
-        where: { departmentId: user.departmentId },
-        _count: { id: true },
+    // Trend Data (Last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const trendGrievances = await prisma.grievance.findMany({
+        where: {
+            departmentId: user.departmentId,
+            createdAt: { gte: thirtyDaysAgo }
+        },
+        select: { createdAt: true }
     });
 
-    // Fetch region names for mapping
-    const regions = await prisma.region.findMany({
-        where: { departmentId: user.departmentId },
-        select: { id: true, name: true }
-    });
-
-    const regionMap = regions.reduce((acc, region) => {
-        acc[region.id] = region.name;
+    const trendMap = trendGrievances.reduce((acc, g) => {
+        const date = g.createdAt.toISOString().split('T')[0];
+        acc[date] = (acc[date] || 0) + 1;
         return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, number>);
+
+    const trendData = Array.from({ length: 31 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (30 - i));
+        const dateStr = d.toISOString().split('T')[0];
+        return {
+            date: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            count: trendMap[dateStr] || 0
+        };
+    });
+
+    // Resolution Time Logic
+    const resolvedGrievances = await prisma.grievance.findMany({
+        where: {
+            departmentId: user.departmentId,
+            status: { in: ["RESOLVED", "CLOSED"] },
+            closedAt: { not: null }
+        },
+        select: { createdAt: true, closedAt: true }
+    });
+
+    const totalSeconds = resolvedGrievances.reduce((acc, g) => {
+        return acc + (g.closedAt!.getTime() - g.createdAt.getTime()) / 1000;
+    }, 0);
+
+    const avgResolutionHours = resolvedGrievances.length > 0 
+        ? (totalSeconds / resolvedGrievances.length) / 3600 
+        : 0;
+
+    const totalCount = await prisma.grievance.count({ where: { departmentId: user.departmentId } });
+    const resolvedCount = statusStats
+        .filter(s => ["RESOLVED", "CLOSED"].includes(s.status))
+        .reduce((sum, s) => sum + s._count.id, 0);
+    const escalatedCount = statusStats.find(s => s.status === "ESCALATED")?._count.id || 0;
+
+    const statusData = statusStats.map(s => ({
+        name: s.status.replace('_', ' ').toLowerCase(),
+        value: s._count.id,
+        color: getStatusHexColor(s.status)
+    }));
+
+    const categoryData = categoryStats.map(c => ({
+        name: c.category.charAt(0).toUpperCase() + c.category.slice(1).toLowerCase(),
+        value: c._count.id
+    }));
 
     return (
         <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/30">
@@ -59,115 +105,84 @@ export default async function DeptHeadAnalytics() {
             <Navbar userRole="DEPT_HEAD" userName={user.name} />
 
             <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
-                <div className="mb-8">
-                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
-                        Department Analytics
-                    </h1>
-                    <p className="text-lg text-slate-500 font-medium">
-                        Deep dive into grievance data and trends
-                    </p>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Status Breakdown */}
-                    <div className="rounded-3xl border border-slate-200/60 bg-white p-6 sm:p-8 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                            <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">
-                                <ChartPieIcon className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-heading font-bold text-slate-900">By Status</h3>
-                        </div>
-
-                        <div className="space-y-3 relative z-10">
-                            {statusStats.length === 0 ? (
-                                <p className="text-sm text-slate-500 italic">No data available.</p>
-                            ) : (
-                                statusStats.map((stat) => (
-                                    <div key={stat.status} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-300 transition-colors">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`w-2 h-2 rounded-full ${getStatusColor(stat.status)}`}></span>
-                                            <span className="text-sm font-bold text-slate-700 capitalize">{stat.status.replace('_', ' ')}</span>
-                                        </div>
-                                        <span className="rounded-lg bg-white border border-slate-200 px-3 py-1 text-sm font-black text-slate-900 shadow-sm">
-                                            {stat._count.id}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Category Breakdown */}
-                    <div className="rounded-3xl border border-slate-200/60 bg-white p-6 sm:p-8 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                            <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
-                                <TagIcon className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-heading font-bold text-slate-900">By Category</h3>
-                        </div>
-
-                        <div className="space-y-3 relative z-10">
-                            {categoryStats.length === 0 ? (
-                                <p className="text-sm text-slate-500 italic">No data available.</p>
-                            ) : (
-                                categoryStats.map((stat) => (
-                                    <div key={stat.category} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-300 transition-colors">
-                                        <span className="text-sm font-bold text-slate-700 capitalize">{stat.category.toLowerCase()}</span>
-                                        <span className="rounded-lg bg-white border border-slate-200 px-3 py-1 text-sm font-black text-slate-900 shadow-sm">
-                                            {stat._count.id}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Region Breakdown */}
-                    <div className="rounded-3xl border border-slate-200/60 bg-white p-6 sm:p-8 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
-                                <MapPinIcon className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-heading font-bold text-slate-900">By Region</h3>
-                        </div>
-
-                        <div className="space-y-3 relative z-10">
-                            {regionStats.length === 0 ? (
-                                <p className="text-sm text-slate-500 italic">No data available.</p>
-                            ) : (
-                                regionStats.map((stat) => (
-                                    <div key={stat.regionId || "unknown"} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-300 transition-colors">
-                                        <span className="text-sm font-bold text-slate-700">
-                                            {stat.regionId ? (regionMap[stat.regionId] || "Unknown Region") : "Unassigned"}
-                                        </span>
-                                        <span className="rounded-lg bg-white border border-slate-200 px-3 py-1 text-sm font-black text-slate-900 shadow-sm">
-                                            {stat._count.id}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Empty State / Insight hint */}
-                <div className="mt-8 rounded-3xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 sm:p-8 shadow-sm flex items-center gap-6">
-                    <div className="hidden sm:flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-blue-600 border border-blue-100 shadow-sm shrink-0">
-                        <ArrowTrendingUpIcon className="h-8 w-8" />
-                    </div>
+                <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
-                        <h4 className="text-lg font-heading font-bold text-slate-900 mb-1">More Insights Coming Soon</h4>
-                        <p className="text-sm font-medium text-slate-600">
-                            We are working on adding comprehensive charts, timeline analysis, and resolution time tracking to give you a clearer picture of your department's performance.
+                        <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2 flex items-center gap-3">
+                            <ChartBarIcon className="h-10 w-10 text-blue-600" />
+                            Performance Insights
+                        </h1>
+                        <p className="text-lg text-slate-500 font-medium">
+                            Real-time departmental oversight and impact metrics.
                         </p>
+                    </div>
+                </div>
+
+                <KPIStats 
+                    total={totalCount}
+                    resolved={resolvedCount}
+                    avgResolutionTime={avgResolutionHours}
+                    escalated={escalatedCount}
+                />
+
+                <AnalyticsCharts 
+                    trendData={trendData}
+                    statusData={statusData}
+                    categoryData={categoryData}
+                />
+
+                <div className="mt-8 rounded-3xl border border-slate-200/60 bg-white/50 backdrop-blur-xl p-8 shadow-sm">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
+                            <PresentationChartLineIcon className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-heading font-bold text-slate-900">Operational Summary</h3>
+                            <p className="text-sm text-slate-500">Key take-aways for departmental management</p>
+                        </div>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-8 mt-8">
+                        <SummaryItem 
+                            label="Health Score" 
+                            value={totalCount > 0 ? (resolvedCount / totalCount > 0.7 ? "Excellent" : "Needs Attention") : "N/A"}
+                            desc="Based on resolution vs incoming volume ratio."
+                        />
+                        <SummaryItem 
+                            label="Risk Factor" 
+                            value={escalatedCount > 5 ? "High" : (escalatedCount > 0 ? "Moderate" : "Low")}
+                            desc="Critical cases currently awaiting senior resolution."
+                        />
+                        <SummaryItem 
+                            label="Trend Velocity" 
+                            value={trendGrievances.length > 20 ? "Increasing" : "Stable"}
+                            desc="Growth of incoming reports in the last 30 days."
+                        />
                     </div>
                 </div>
             </main>
         </div>
     );
+}
+
+function SummaryItem({ label, value, desc }: { label: string, value: string, desc: string }) {
+    return (
+        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{label}</p>
+            <p className="text-xl font-bold text-slate-900 mb-2">{value}</p>
+            <p className="text-xs text-slate-500 leading-relaxed font-medium">{desc}</p>
+        </div>
+    );
+}
+
+function getStatusHexColor(status: string) {
+    switch (status) {
+        case "SUBMITTED": return "#3b82f6";
+        case "ASSIGNED": return "#6366f1";
+        case "IN_PROGRESS": return "#f59e0b";
+        case "RESOLVED": return "#10b981";
+        case "CLOSED": return "#64748b";
+        case "ESCALATED": return "#ef4444";
+        default: return "#94a3b8";
+    }
 }
 
 function getStatusColor(status: string) {

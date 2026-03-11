@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +10,14 @@ export async function GET() {
             where: { key: "MAINTENANCE_MODE" }
         });
 
+        const user = await getCurrentUser();
+        const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
         return NextResponse.json({
-            maintenanceMode: setting?.value === "true"
+            maintenanceMode: setting?.value === "true",
+            isAdmin
         });
     } catch (error) {
-        return NextResponse.json({ maintenanceMode: false });
+        return NextResponse.json({ maintenanceMode: false, isAdmin: false });
     }
 }

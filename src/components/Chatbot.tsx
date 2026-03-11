@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import {
     ChatBubbleLeftRightIcon,
@@ -22,6 +23,7 @@ export default function Chatbot() {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const pathname = usePathname();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,7 +46,7 @@ export default function Chatbot() {
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage }),
+                body: JSON.stringify({ message: userMessage, currentPath: pathname }),
             });
 
             if (!response.ok) throw new Error("Failed to fetch response");
@@ -81,8 +83,7 @@ export default function Chatbot() {
                 <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-[100] w-[calc(100%-2rem)] sm:w-[400px] bg-white/95 backdrop-blur-2xl border border-white/40 rounded-[2rem] shadow-2xl ring-1 ring-slate-900/5 animate-slide-up flex flex-col h-[500px] sm:h-[600px] max-h-[80vh] overflow-hidden">
                     {/* Header */}
                     <div className="relative shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 p-5 flex items-center justify-between overflow-hidden">
-                        {/* Decorative background pattern */}
-                        <div className="absolute inset-0 bg-white/10 opacity-50 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+                        {/* Decorative background pattern removed per user request */}
                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 blur-2xl rounded-full pointer-events-none"></div>
 
                         <div className="flex items-center gap-4 relative z-10">

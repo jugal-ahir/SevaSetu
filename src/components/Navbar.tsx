@@ -167,7 +167,15 @@ export default function Navbar({ userRole, userName }: NavbarProps) {
                 <div className="px-4 py-2 sm:px-6 lg:px-8">
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-3 group">
+                        <Link 
+                            href={
+                                userRole === "CITIZEN" ? "/citizen/dashboard" :
+                                userRole === "OFFICER" ? "/officer/dashboard" :
+                                userRole === "DEPT_HEAD" ? "/dept-head/dashboard" :
+                                "/admin/dashboard"
+                            } 
+                            className="flex items-center gap-3 group"
+                        >
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shadow-slate-200/50 transition-all group-hover:scale-105 p-1.5 ring-1 ring-slate-100">
                                 <img
                                     src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
