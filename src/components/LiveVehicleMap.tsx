@@ -30,26 +30,56 @@ function RecenterMap({ position }: { position: [number, number] }) {
     return null;
 }
 
+// Internal component to handle map interactions
+function InternalMapControls({ isSatellite, setIsSatellite }: { isSatellite: boolean, setIsSatellite: (s: boolean) => void }) {
+    const map = useMap();
+    return (
+        <div className="absolute top-8 right-8 z-[1000] flex flex-col gap-3 animate-fade-in" style={{ animationDelay: '0.2s', pointerEvents: 'auto' }}>
+            <button
+                onClick={() => map.zoomIn()}
+                className="h-14 w-14 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl flex items-center justify-center text-xl border border-white/50 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            >
+                ➕
+            </button>
+            <button
+                onClick={() => map.zoomOut()}
+                className="h-14 w-14 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl flex items-center justify-center text-xl border border-white/50 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            >
+                ➖
+            </button>
+            <button
+                onClick={() => setIsSatellite(!isSatellite)}
+                className={`h-14 w-14 rounded-2xl shadow-xl flex items-center justify-center text-xl transition-all hover:scale-110 shadow-blue-500/30 ${isSatellite ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'}`}
+            >
+                {isSatellite ? '🏙️' : '🛰️'}
+            </button>
+        </div>
+    );
+}
+
 export default function LiveVehicleMap({ vehicleName }: { vehicleName: string }) {
     const [currentPos, setCurrentPos] = useState<[number, number]>(ROAD_PATH[0]);
     const [rotation, setRotation] = useState(0);
     const [pathIndex, setPathIndex] = useState(0);
     const [progress, setProgress] = useState(0);
+    const [isSatellite, setIsSatellite] = useState(false);
 
-    // Create a rotating truck icon using a DivIcon
+    // Create a rotating premium marker using a DivIcon
     const vehicleIcon = useMemo(() => {
         if (typeof window === "undefined") return null;
         return L.divIcon({
             className: "bg-transparent",
             html: `
-                <div style="transform: rotate(${rotation - 90}deg); transition: transform 0.1s linear;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2555/2555013.png" style="width: 40px; height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));" />
+                <div class="relative group" style="transform: rotate(${rotation - 90}deg); transition: transform 0.1s linear;">
+                    <div class="h-12 w-12 bg-blue-600 rounded-full border-4 border-white shadow-2xl flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                        ${vehicleName.toLowerCase().includes('water') ? '💧' : '🚛'}
+                    </div>
                 </div>
             `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20],
+            iconSize: [48, 48],
+            iconAnchor: [24, 24],
         });
-    }, [rotation]);
+    }, [rotation, vehicleName]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -82,13 +112,16 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
     if (!vehicleIcon) return null;
 
     return (
-        <div className="relative h-full w-full overflow-hidden bg-slate-100">
-            <div className="absolute top-6 left-6 z-[1000] rounded-2xl bg-white px-5 py-3 shadow-xl border border-slate-100 ring-4 ring-slate-50">
-                <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                    <div>
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Live Surveillance</p>
-                        <p className="text-base font-black text-slate-900">{vehicleName}</p>
+        <div className="relative h-full w-full overflow-hidden bg-slate-50">
+            {/* Glassmorphism Header Overlay */}
+            <div className="absolute top-8 left-8 z-[1000] animate-fade-in pointer-events-none">
+                <div className="backdrop-blur-xl bg-white/80 border border-white/40 rounded-3xl px-6 py-4 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]">
+                    <div className="flex items-center gap-4">
+                        <div className="h-3 w-3 rounded-full bg-blue-500 animate-pulse ring-4 ring-blue-500/20" />
+                        <div>
+                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] leading-none mb-1">Fleet Surveillance</p>
+                            <p className="text-xl font-black text-slate-900 leading-none">{vehicleName}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -97,30 +130,45 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
                 // @ts-ignore
                 center={ROAD_PATH[0]}
                 zoom={16}
-                scrollWheelZoom={false}
+                scrollWheelZoom={true}
                 className="h-full w-full"
                 zoomControl={false}
             >
                 <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    url={isSatellite
+                        ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    }
+                    attribution={isSatellite ? "Esri, DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community" : ""}
                 />
 
                 <Polyline
                     // @ts-ignore
                     positions={ROAD_PATH}
-                    color="#1e293b"
-                    weight={6}
-                    opacity={0.08}
+                    color={isSatellite ? "#fde047" : "#3b82f6"}
+                    weight={8}
+                    opacity={isSatellite ? 0.4 : 0.1}
                 />
 
                 {/* @ts-ignore */}
                 <Marker position={currentPos} icon={vehicleIcon} />
 
                 <RecenterMap position={currentPos} />
+                <InternalMapControls isSatellite={isSatellite} setIsSatellite={setIsSatellite} />
             </MapContainer>
 
-            <div className="absolute bottom-6 left-6 z-[1000] rounded-xl bg-slate-900/90 backdrop-blur-md px-4 py-2 text-[10px] font-bold text-white uppercase tracking-widest shadow-lg">
-                Speed: 42 km/h • Heading: {rotation.toFixed(0)}°
+            {/* Bottom Glass Badge */}
+            <div className="absolute bottom-8 left-8 z-[1000] animate-fade-in pointer-events-none" style={{ animationDelay: '0.4s' }}>
+                <div className="backdrop-blur-xl bg-slate-900/90 border border-white/10 rounded-2xl px-5 py-3 shadow-2xl">
+                    <div className="flex items-center gap-4 text-xs font-bold text-white uppercase tracking-widest">
+                        <span className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                            Speed: 42 km/h
+                        </span>
+                        <span className="w-px h-3 bg-white/20"></span>
+                        <span className="opacity-60">Heading: {rotation.toFixed(0)}° SV</span>
+                    </div>
+                </div>
             </div>
         </div>
     );

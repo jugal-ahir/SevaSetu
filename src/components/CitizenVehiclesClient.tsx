@@ -32,28 +32,37 @@ export default function CitizenVehiclesClient({ vehicles }: { vehicles: Vehicle[
                 </div>
             ) : (
                 vehicles.map((vehicle) => (
-                    <div key={vehicle.id} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
+                    <div key={vehicle.id} className="rounded-3xl border border-blue-100 bg-blue-50/50 p-8 shadow-sm transition-all hover:bg-blue-50 hover:shadow-xl hover:shadow-blue-500/10 group">
                         <div className="flex items-start justify-between">
-                            <div className="rounded-lg bg-blue-100 p-3 text-blue-600">
+                            <div className="rounded-2xl bg-blue-600 p-4 text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
                                 <TruckIcon className="h-6 w-6" />
                             </div>
-                            <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                                Active
+                            <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-800 border border-emerald-200">
+                                Live Now
                             </span>
                         </div>
 
-                        <h3 className="mt-4 text-lg font-bold text-slate-900">{vehicle.registrationNumber}</h3>
-                        <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">{vehicle.type.replace("_", " ")}</p>
+                        <h3 className="mt-6 text-xl font-heading font-black text-slate-900 tracking-tight">{vehicle.registrationNumber}</h3>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">{vehicle.type.replace("_", " ")}</p>
 
-                        <div className="mt-6 space-y-3 border-t border-slate-100 pt-4 text-sm text-slate-600">
-                            <div className="flex items-center gap-2">
-                                <MapIcon className="h-4 w-4" />
-                                <span>{vehicle.lastKnownLat?.toFixed(4) || "23.03"}, {vehicle.lastKnownLng?.toFixed(4) || "72.55"}</span>
+                        <div className="mt-8 space-y-4 border-t border-blue-200/50 pt-6">
+                            <div className="flex items-center gap-3 text-sm font-bold text-slate-600">
+                                <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center border border-blue-100 shadow-sm">
+                                    <MapIcon className="h-4 w-4 text-blue-600" />
+                                </div>
+                                <span>{vehicle.lastKnownLat?.toFixed(4) || "23.04"}, {vehicle.lastKnownLng?.toFixed(4) || "72.55"}</span>
                             </div>
-                            {vehicle.department && <p className="text-xs text-slate-400">Dept: {vehicle.department.name}</p>}
-                            <button onClick={() => setTrackingVehicle(vehicle)} className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700">
-                                <MapIcon className="h-4 w-4" />
-                                Track Live
+                            {vehicle.department && (
+                                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-white border border-blue-100 px-3 py-1.5 rounded-lg w-max shadow-sm">
+                                    Depart: {vehicle.department.name}
+                                </p>
+                            )}
+                            <button
+                                onClick={() => setTrackingVehicle(vehicle)}
+                                className="mt-4 w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-slate-900 px-6 font-black text-white shadow-xl hover:bg-blue-600 transition-all hover:-translate-y-1 active:scale-95"
+                            >
+                                <MapIcon className="h-5 w-5" />
+                                Launch Tracker
                             </button>
                         </div>
                     </div>
