@@ -65,10 +65,10 @@ export default async function CitizenDashboard() {
                 {/* Header Section */}
                 <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                        <h1 className="text-3xl sm:text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
                             Welcome back, {user.name}
                         </h1>
-                        <p className="text-lg text-slate-500 font-medium">
+                        <p className="text-base sm:text-lg text-slate-500 font-medium">
                             Manage your grievances and track municipal services efficiently.
                         </p>
                     </div>
@@ -76,7 +76,7 @@ export default async function CitizenDashboard() {
                     {/* Primary Call to Action */}
                     <Link
                         href="/citizen/grievances/new"
-                        className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-blue-500/40 relative overflow-hidden"
+                        className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 sm:py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-blue-500/40 relative overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
                         <span className="relative flex items-center gap-2">

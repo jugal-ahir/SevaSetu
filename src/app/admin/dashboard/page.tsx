@@ -84,7 +84,7 @@ export default async function AdminDashboard() {
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <ShieldCheckIcon className="h-8 w-8 text-blue-600" />
-                            <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900">
+                            <h1 className="text-3xl sm:text-4xl font-heading font-black tracking-tight text-slate-900">
                                 System Admin
                             </h1>
                         </div>

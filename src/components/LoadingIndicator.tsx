@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-export default function LoadingIndicator() {
+function LoadingIndicatorContent() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
@@ -36,5 +36,13 @@ export default function LoadingIndicator() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function LoadingIndicator() {
+    return (
+        <Suspense fallback={null}>
+            <LoadingIndicatorContent />
+        </Suspense>
     );
 }

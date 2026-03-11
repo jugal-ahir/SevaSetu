@@ -129,7 +129,7 @@ export default async function AdminGrievancesList({
                                             <td className="px-6 py-5 align-top text-right">
                                                 <Link
                                                     href={`/admin/grievances/${g.id}`}
-                                                    className="inline-flex items-center gap-1.5 font-bold text-amber-600 hover:text-amber-800 transition-colors bg-amber-50 hover:bg-amber-100 border border-amber-200/50 px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                                    className="inline-flex items-center gap-1.5 font-bold text-amber-600 hover:text-amber-800 transition-colors bg-amber-50 hover:bg-amber-100 border border-amber-200/50 px-3 py-1.5 rounded-lg"
                                                 >
                                                     <EyeIcon className="h-4 w-4" />
                                                     View Details

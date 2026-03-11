@@ -3,13 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev -H 0.0.0.0 --webpack",
     "host": "next dev -p 80 -H 0.0.0.0 --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "start:host": "next start -p 80 -H 0.0.0.0",
+    "lint": "eslint",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open android",
+    "adb:bridge": "C:\\Users\\ASUS\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe reverse tcp:3000 tcp:3000",
+    "tunnel": "npx localtunnel --port 3000"
   },
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/geolocation": "^8.1.0",
     "@google/generative-ai": "^0.24.1",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",

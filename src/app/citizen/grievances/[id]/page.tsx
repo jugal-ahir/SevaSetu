@@ -80,7 +80,7 @@ export default async function GrievanceDetailPage({ params }: { params: Promise<
                                     </span>
                                 )}
                             </div>
-                            <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
                                 {grievance.title}
                             </h1>
                         </div>

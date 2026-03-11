@@ -64,7 +64,7 @@ export default function Chatbot() {
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`fixed bottom-6 right-6 z-[100] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen
+                className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[100] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen
                     ? "bg-slate-800 text-white hover:bg-slate-900 rotate-180"
                     : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-blue-500/30"
                     }`}
@@ -78,7 +78,7 @@ export default function Chatbot() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-[100] w-full max-w-[400px] bg-white/90 backdrop-blur-2xl border border-white/40 rounded-[2rem] shadow-2xl ring-1 ring-slate-900/5 animate-slide-up flex flex-col h-[600px] max-h-[85vh] overflow-hidden">
+                <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-[100] w-[calc(100%-2rem)] sm:w-[400px] bg-white/95 backdrop-blur-2xl border border-white/40 rounded-[2rem] shadow-2xl ring-1 ring-slate-900/5 animate-slide-up flex flex-col h-[500px] sm:h-[600px] max-h-[80vh] overflow-hidden">
                     {/* Header */}
                     <div className="relative shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 p-5 flex items-center justify-between overflow-hidden">
                         {/* Decorative background pattern */}

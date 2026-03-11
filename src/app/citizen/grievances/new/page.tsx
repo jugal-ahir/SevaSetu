@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { PhotoIcon, MapPinIcon, SparklesIcon, CheckCircleIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { Geolocation } from "@capacitor/geolocation";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -63,25 +64,36 @@ export default function NewGrievancePage() {
         fetchDepartments();
     }, []);
 
-    const detectLocation = () => {
+    const detectLocation = async () => {
         setDetectingLocation(true);
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setFormData({
-                        ...formData,
-                        latitude: position.coords.latitude.toString(),
-                        longitude: position.coords.longitude.toString(),
-                    });
+        setError("");
+
+        try {
+            const checkPerms = await Geolocation.checkPermissions();
+            
+            if (checkPerms.location !== 'granted') {
+                const requestPerms = await Geolocation.requestPermissions();
+                if (requestPerms.location !== 'granted') {
+                    setError("Location permission denied. Please enable it in settings.");
                     setDetectingLocation(false);
-                },
-                (error) => {
-                    setError("Unable to detect location. Please enter manually.");
-                    setDetectingLocation(false);
+                    return;
                 }
-            );
-        } else {
-            setError("Geolocation is not supported by your browser");
+            }
+
+            const position = await Geolocation.getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 10000
+            });
+
+            setFormData({
+                ...formData,
+                latitude: position.coords.latitude.toString(),
+                longitude: position.coords.longitude.toString(),
+            });
+        } catch (err: any) {
+            console.error("Location error:", err);
+            setError("Unable to detect location. Please ensure GPS is on and try again.");
+        } finally {
             setDetectingLocation(false);
         }
     };
@@ -202,10 +214,10 @@ export default function NewGrievancePage() {
                         <ArrowLeftIcon className="h-4 w-4" />
                         Back to Dashboard
                     </Link>
-                    <h1 className="text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
+                    <h1 className="text-3xl sm:text-4xl font-heading font-black tracking-tight text-slate-900 mb-2">
                         Report Grievance
                     </h1>
-                    <p className="text-lg text-slate-500 font-medium">
+                    <p className="text-base sm:text-lg text-slate-500 font-medium">
                         Provide detailed information to help us resolve the issue faster.
                     </p>
                 </div>
@@ -227,7 +239,7 @@ export default function NewGrievancePage() {
                             </label>
 
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10">
-                                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-4 text-sm font-bold text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50/50 shadow-sm w-full sm:w-auto min-w-[200px]">
+                                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-4 text-sm font-bold text-slate-700 transition-all hover:border-blue-400 hover:bg-blue-50/50 shadow-sm w-full sm:w-auto">
                                     <PhotoIcon className="h-6 w-6 text-blue-500" />
                                     {imageFile ? "Change Image" : "Choose Image"}
                                     <input
