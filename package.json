@@ -12,7 +12,8 @@
     "cap:sync": "npx cap sync",
     "cap:open": "npx cap open android",
     "adb:bridge": "C:\\Users\\ASUS\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe reverse tcp:3000 tcp:3000",
-    "tunnel": "npx localtunnel --port 3000"
+    "tunnel": "npx localtunnel --port 3000",
+    "prepare": "husky"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
@@ -51,7 +52,14 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }
