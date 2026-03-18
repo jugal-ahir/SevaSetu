@@ -137,7 +137,7 @@ export default async function CitizenDashboard() {
                                     </div>
                                     <h3 className="text-lg font-bold text-slate-900 mb-2">No grievances reported</h3>
                                     <p className="max-w-sm mx-auto text-sm text-slate-500 mb-6">
-                                        You haven't reported any issues yet. If you face any civic problems, feel free to report them here.
+                                        You haven&apos;t reported any issues yet. If you face any civic problems, feel free to report them here.
                                     </p>
                                     <Link
                                         href="/citizen/grievances/new"

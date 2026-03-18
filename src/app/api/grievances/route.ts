@@ -139,6 +139,8 @@ export async function GET(req: Request) {
         const status = searchParams.get("status");
         const category = searchParams.get("category");
 
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where: any = {};
 
         // Role-based filtering

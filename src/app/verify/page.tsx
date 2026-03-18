@@ -44,7 +44,7 @@ export default function VerifyPage() {
 
             // Redirect to citizen dashboard
             router.push("/citizen/dashboard");
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(err.message);
         } finally {
             setLoading(false);

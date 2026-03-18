@@ -14,6 +14,8 @@ export interface AuthTokenPayload {
   email: string;
   role: Role;
   isVerified: boolean;
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

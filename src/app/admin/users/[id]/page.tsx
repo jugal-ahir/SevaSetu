@@ -61,7 +61,7 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
                         Modify Account
                     </h1>
                     <p className="text-lg text-slate-500 font-medium ml-11">
-                        Update {userToEdit.name}'s identity, role, and department assignment.
+                        Update {userToEdit.name}&apos;s identity, role, and department assignment.
                     </p>
                 </div>
 

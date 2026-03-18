@@ -53,6 +53,8 @@ export default function RegisterPage() {
 
             // Redirect to verification page
             router.push("/verify");
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             setError(err.message);
             setLoading(false);

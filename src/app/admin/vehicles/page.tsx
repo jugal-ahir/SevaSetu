@@ -74,6 +74,8 @@ export default async function AdminVehicles() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-bl-full pointer-events-none transition-colors"></div>
                     <div className="relative z-10">
                         <AdminVehiclesClient
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             initialVehicles={vehicles as any}
                             departments={departments}
                             createVehicleAction={createVehicle}

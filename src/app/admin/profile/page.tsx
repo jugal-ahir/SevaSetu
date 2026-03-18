@@ -15,9 +15,17 @@ import {
 
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 
+interface AdminProfileUser {
+    name: string;
+    email: string;
+    role: "ADMIN" | "SUPER_ADMIN" | "CITIZEN" | "OFFICER" | "DEPT_HEAD";
+    phone?: string | null;
+    twoFactorEnabled: boolean;
+}
+
 export default function AdminProfile() {
     const router = useRouter();
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<AdminProfileUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [toggling2FA, setToggling2FA] = useState(false);

@@ -101,6 +101,7 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
 
         // Calculate heading (bearing)
         const angle = Math.atan2(end[1] - start[1], end[0] - start[0]) * (180 / Math.PI);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setRotation(90 - angle);
 
         const lat = start[0] + (end[0] - start[0]) * progress;
@@ -127,7 +128,6 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
             </div>
 
             <MapContainer
-                // @ts-ignore
                 center={ROAD_PATH[0]}
                 zoom={16}
                 scrollWheelZoom={true}
@@ -143,14 +143,12 @@ export default function LiveVehicleMap({ vehicleName }: { vehicleName: string })
                 />
 
                 <Polyline
-                    // @ts-ignore
                     positions={ROAD_PATH}
                     color={isSatellite ? "#fde047" : "#3b82f6"}
                     weight={8}
                     opacity={isSatellite ? 0.4 : 0.1}
                 />
 
-                {/* @ts-ignore */}
                 <Marker position={currentPos} icon={vehicleIcon} />
 
                 <RecenterMap position={currentPos} />

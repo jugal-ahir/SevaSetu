@@ -31,6 +31,8 @@ export default function Navbar({ userRole, userName }: NavbarProps) {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [systemMenuOpen, setSystemMenuOpen] = useState(false);
     const [notificationsOpen, setNotificationsOpen] = useState(false);
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [notifications, setNotifications] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [hasUnreadChat, setHasUnreadChat] = useState(false);
@@ -272,7 +274,7 @@ export default function Navbar({ userRole, userName }: NavbarProps) {
                                                     <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
                                                         <BellIcon className="h-6 w-6 text-slate-300" />
                                                     </div>
-                                                    <p className="text-xs font-medium text-slate-500">You're all caught up!</p>
+                                                    <p className="text-xs font-medium text-slate-500">You&apos;re all caught up!</p>
                                                     <p className="text-[10px] text-slate-400 mt-1">No new notifications</p>
                                                 </div>
                                             ) : (

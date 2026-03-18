@@ -220,7 +220,7 @@ export default async function DeptHeadGrievanceDetail({ params }: { params: Prom
 
                                                 {entry.note && (
                                                     <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-600 italic">
-                                                        "{entry.note}"
+                                                        &quot;{entry.note}&quot;
                                                     </div>
                                                 )}
                                             </div>
