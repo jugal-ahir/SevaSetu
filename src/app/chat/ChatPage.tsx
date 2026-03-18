@@ -70,6 +70,8 @@ export default function ChatPage({ currentUser, staffUsers }: ChatPageProps) {
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
     };
 
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sendSignal = async (type: string, data: any = {}) => {
         await fetch("/api/chat/video", {
             method: "POST",

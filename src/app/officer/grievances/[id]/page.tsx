@@ -1,4 +1,5 @@
 import { redirect, notFound } from "next/navigation";
+import { GrievanceStatus } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
@@ -40,7 +41,7 @@ export default async function OfficerGrievanceDetail({ params }: { params: Promi
 
     async function updateStatus(formData: FormData) {
         "use server";
-        const newStatus = formData.get("status") as any;
+        const newStatus = formData.get("status") as GrievanceStatus;
         const note = formData.get("note") as string;
         const grievanceId = formData.get("grievanceId") as string;
 
@@ -186,7 +187,7 @@ export default async function OfficerGrievanceDetail({ params }: { params: Promi
 
                                                 {entry.note && (
                                                     <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-600 italic">
-                                                        "{entry.note}"
+                                                        &quot;{entry.note}&quot;
                                                     </div>
                                                 )}
                                             </div>

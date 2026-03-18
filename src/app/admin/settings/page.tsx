@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import SlaRuleForm from "@/components/SlaRuleForm";
 import SettingsToggle from "@/components/SettingsToggle";
+import { Role } from "@prisma/client";
 import {
     Cog6ToothIcon,
     ShieldCheckIcon,
@@ -49,7 +50,7 @@ export default async function AdminSettings() {
         const category = formData.get("category") as string;
         const priority = formData.get("priority") as string;
         const durationSeconds = parseInt(formData.get("durationSeconds") as string);
-        const escalationRole = formData.get("escalationRole") as any;
+        const escalationRole = formData.get("escalationRole") as Role;
         const departmentId = formData.get("departmentId") as string;
 
         await prisma.slaRule.create({

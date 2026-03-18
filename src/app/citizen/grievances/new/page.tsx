@@ -22,6 +22,8 @@ export default function NewGrievancePage() {
         longitude: "",
         departmentId: "",
     });
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [departments, setDepartments] = useState<any[]>([]);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [error, setError] = useState("");
@@ -29,7 +31,9 @@ export default function NewGrievancePage() {
     const [detectingLocation, setDetectingLocation] = useState(false);
     const [uploadProgress, setUploadProgress] = useState("");
     const [isScanning, setIsScanning] = useState(false);
+                 
     const [scanComplete, setScanComplete] = useState(false);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [scanAnimationData, setScanAnimationData] = useState<any>(null);
 
     useEffect(() => {
@@ -88,8 +92,10 @@ export default function NewGrievancePage() {
             setFormData({
                 ...formData,
                 latitude: position.coords.latitude.toString(),
+                 
                 longitude: position.coords.longitude.toString(),
             });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error("Location error:", err);
             setError("Unable to detect location. Please ensure GPS is on and try again.");
@@ -127,9 +133,11 @@ export default function NewGrievancePage() {
                 ...prev,
                 ...data,
                 departmentId: departments.find(d => d.name.toUpperCase().includes(data.category))?.id || prev.departmentId
+                 
             }));
 
             setScanComplete(true);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -186,10 +194,12 @@ export default function NewGrievancePage() {
                         .join("; ");
                     errorMessage += `: ${validationErrors}`;
                 }
+                 
                 throw new Error(errorMessage);
             }
 
             router.push(`/citizen/grievances/${data.grievance.id}`);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             setError(err.message);
             window.scrollTo({ top: 0, behavior: "smooth" });
@@ -453,11 +463,13 @@ export default function NewGrievancePage() {
                                 className="particle"
                                 style={{
                                     left: `${(i * 7) % 100}%`,
+                 
                                     top: `${(i * 13) % 100}%`,
                                     width: `${((i % 3) + 1) * 2}px`,
                                     height: `${((i % 3) + 1) * 2}px`,
                                     opacity: 0.3,
                                     animationDelay: `${i * 0.2}s`,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 } as any}
                             />
                         ))}

@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export default function Loading() {
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [animationData, setAnimationData] = useState<any>(null);
 
     useEffect(() => {

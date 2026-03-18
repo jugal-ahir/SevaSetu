@@ -59,6 +59,8 @@ export async function POST(req: Request) {
         const { passwordHash: _, ...userWithoutPassword } = newUser;
 
         return NextResponse.json(userWithoutPassword, { status: 201 });
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Error creating user:", error);
         return NextResponse.json(

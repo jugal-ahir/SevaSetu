@@ -181,18 +181,18 @@ export default async function DeptHeadDashboard({
                                                         <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                         </svg>
-                                                        {(grievance as any).citizen.name}
+                                                        {grievance.citizen.name}
                                                     </span>
                                                     <span className="flex items-center gap-1 mt-0.5">
                                                         <ClockIcon className="w-3.5 h-3.5 text-slate-400" />
                                                         {new Date(grievance.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                     </span>
                                                     <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border bg-slate-50 text-slate-600 border-slate-200`}>
-                                                        Officer: {(grievance as any).assignedTo?.name || "Unassigned"}
+                                                        Officer: {grievance.assignedTo?.name || "Unassigned"}
                                                     </span>
-                                                    {(grievance as any).region && (
+                                                    {grievance.region && (
                                                         <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border bg-blue-50 text-blue-700 border-blue-200`}>
-                                                            {(grievance as any).region.name}
+                                                            {grievance.region.name}
                                                         </span>
                                                     )}
                                                 </div>

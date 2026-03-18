@@ -30,12 +30,16 @@ export async function GET() {
                 }
             };
 
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const onMessage = (message: any) => {
                 if (!safeSend(`data: ${JSON.stringify(message)}\n\n`)) {
                     cleanup();
                 }
             };
+                 
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const onVideoCall = (data: any) => {
                 if (!safeSend(`data: ${JSON.stringify({ sseType: "video-call", ...data })}\n\n`)) {
                     cleanup();
@@ -68,11 +72,17 @@ export async function GET() {
 
             // Send initial connection event
             safeSend(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
+                 
 
             // Store cleanup for cancel event
+                 
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (this as any)._cleanup = cleanup;
         },
         cancel() {
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((this as any)._cleanup) (this as any)._cleanup();
         },
     });

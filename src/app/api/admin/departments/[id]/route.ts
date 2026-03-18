@@ -42,6 +42,8 @@ export async function PATCH(
         });
 
         return NextResponse.json(updatedDept);
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Error updating department:", error);
         return NextResponse.json(

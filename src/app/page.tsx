@@ -86,7 +86,7 @@ export default function LandingPage() {
         <div className="mt-32">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-heading font-bold text-white">Why SevaSetu?</h2>
-            <p className="mt-4 text-slate-400">Everything you need to transform your city's service delivery framework.</p>
+            <p className="mt-4 text-slate-400">Everything you need to transform your city&apos;s service delivery framework.</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
             <FeatureCard

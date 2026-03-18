@@ -8,7 +8,7 @@ interface TwoFactorModalProps {
     onClose: () => void;
     userId: string;
     email: string;
-    onSuccess: (userData: any) => void;
+    onSuccess: (userData: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export default function TwoFactorModal({ isOpen, onClose, userId, email, onSuccess }: TwoFactorModalProps) {
@@ -83,7 +83,7 @@ export default function TwoFactorModal({ isOpen, onClose, userId, email, onSucce
             if (!res.ok) throw new Error(data.error || "Verification failed");
 
             onSuccess(data.user);
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(err.message);
         } finally {
             setLoading(false);

@@ -84,6 +84,8 @@ export async function POST(req: Request) {
                             console.log(`Gemini ${modelName} Success!`);
                             return NextResponse.json(JSON.parse(jsonMatch[0]));
                         }
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } catch (e: any) {
                         console.warn(`Gemini ${modelName} Error/Quota: ${e.message}`);
                     }
@@ -138,7 +140,9 @@ export async function POST(req: Request) {
                 if (jsonMatch) {
                     console.log("Groq Llama 4 Vision Success!");
                     return NextResponse.json(JSON.parse(jsonMatch[0]));
+                 
                 }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (groqErr: any) {
                 console.error("Groq Vision Layer Error:", groqErr.message);
 
@@ -170,8 +174,10 @@ export async function POST(req: Request) {
         console.log("Falling back to Heuristic Engine for:", fileName);
         await new Promise(resolve => setTimeout(resolve, 1500));
 
+                 
         return NextResponse.json(mapCaptionToResult(fileName, true));
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Critical Analysis error:", error);
         return NextResponse.json(

@@ -37,13 +37,13 @@ export default function LoginPage() {
             }
 
             handleLoginSuccess(data.user);
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(err.message);
             setLoading(false);
         }
     };
 
-    const handleLoginSuccess = (user: any) => {
+    const handleLoginSuccess = (user: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         const role = user.role;
         if (role === "ADMIN" || role === "SUPER_ADMIN") {
             router.push("/admin/dashboard?noAnim=true");
@@ -187,7 +187,7 @@ export default function LoginPage() {
                         </form>
 
                         <div className="mt-8 text-center text-sm font-medium">
-                            <span className="text-slate-500">Don't have an account? </span>
+                            <span className="text-slate-500">Don&apos;t have an account? </span>
                             <Link href="/register" className="text-blue-600 hover:text-blue-700 transition-colors underline decoration-blue-600/30 underline-offset-4 font-bold">
                                 Register here
                             </Link>

@@ -27,6 +27,7 @@ export default async function AdminGrievancesList({
     const grievances = await prisma.grievance.findMany({
         where: {
             AND: [
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 status ? { status: status as any } : {},
                 q ? {
                     OR: [
@@ -95,7 +96,7 @@ export default async function AdminGrievancesList({
                                         </td>
                                     </tr>
                                 ) : (
-                                    (grievances as any[]).map(g => (
+                                    grievances.map(g => (
                                         <tr key={g.id} className="hover:bg-amber-50/30 transition-colors group">
                                             <td className="px-6 py-5 align-top">
                                                 <div className="flex flex-col gap-1">

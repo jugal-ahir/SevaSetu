@@ -13,7 +13,7 @@ export default function MaintenancePage() {
             </h1>
 
             <p className="mb-12 max-w-lg text-lg font-medium text-slate-600 leading-relaxed">
-                We're currently performing some essential system upgrades to serve you better.
+                We&apos;re currently performing some essential system upgrades to serve you better.
                 Normal services will be restored shortly. Thank you for your patience.
             </p>
 

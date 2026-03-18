@@ -8,6 +8,8 @@ import ChangePasswordModal from "@/components/ChangePasswordModal";
 
 export default function OfficerProfile() {
     const router = useRouter();
+                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);

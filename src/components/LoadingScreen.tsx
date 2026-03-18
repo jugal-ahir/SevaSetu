@@ -10,7 +10,7 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 function LoadingContent() {
     const [isVisible, setIsVisible] = useState(true);
     const [isAnimating, setIsAnimating] = useState(true);
-    const [animationData, setAnimationData] = useState<any>(null);
+    const [animationData, setAnimationData] = useState<object | null>(null);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const noAnim = searchParams.get("noAnim") === "true";
@@ -25,6 +25,7 @@ function LoadingContent() {
 
     useEffect(() => {
         if (noAnim) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsVisible(false);
             setIsAnimating(false);
             return;
@@ -48,7 +49,7 @@ function LoadingContent() {
     return (
         <div className={`fixed inset-0 z-[9999] flex items-center justify-center bg-[#f8fafc] transition-opacity duration-700 ${isAnimating ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <div className="w-64 h-64 md:w-96 md:h-96">
-                {animationData && (
+                {animationData !== null && (
                     <Lottie
                         animationData={animationData}
                         loop={true}
