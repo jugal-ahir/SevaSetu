@@ -3,10 +3,6 @@ import Groq from "groq-sdk";
 import { prisma } from "@/lib/prisma";
 import { getAuthToken } from "@/lib/auth";
 
-// Initialize Groq
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
 
 export async function POST(req: NextRequest) {
     try {
@@ -20,6 +16,10 @@ export async function POST(req: NextRequest) {
                 { status: 503 }
             );
         }
+
+        const groq = new Groq({
+            apiKey: process.env.GROQ_API_KEY,
+        });
 
         // 1. Check for Grievance Status Query
         // Simple regex to catch "status of [id]" or "check [id]"
