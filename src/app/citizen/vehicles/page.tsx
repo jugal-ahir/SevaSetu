@@ -30,7 +30,7 @@ export default async function CitizenVehicles() {
                     <p className="mt-2 text-slate-600">Real-time location of municipal service vehicles</p>
                 </div>
 
-                <CitizenVehiclesClient vehicles={vehicles as any} />
+                <CitizenVehiclesClient vehicles={vehicles} />
             </main>
         </div>
     );
