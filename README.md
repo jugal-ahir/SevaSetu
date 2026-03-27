@@ -98,6 +98,43 @@ Our mission is to empower citizens and digitize municipal workflows with state-o
 
 Open [http://localhost:3000](http://localhost:3000) to experience the platform.
 
+## 📸 Project Screenshots
+
+<div align="center">
+  <img src="./public/screenshots/landing.png" alt="Landing Page" width="800px" style="margin-bottom: 20px;">
+  <p><i>The premium, glassmorphic landing page designed for a modern governance experience.</i></p>
+  
+  <br/>
+  
+  <img src="./public/screenshots/dashboard.png" alt="Dashboard" width="800px" style="margin-bottom: 20px;">
+  <p><i>The central command center for field officers and administrators.</i></p>
+  
+  <br/>
+  
+  <img src="./public/screenshots/analytics.png" alt="Analytics" width="800px" style="margin-bottom: 20px;">
+  <p><i>Deep insights and performance metrics for department heads.</i></p>
+  
+  <br/>
+  
+  <img src="./public/screenshots/chatbot.png" alt="Seva-Sahayak Chatbot" width="800px" style="margin-bottom: 20px;">
+  <p><i>AI-powered assistance for citizen queries and grievance tracking.</i></p>
+  
+  <br/>
+  
+  <img src="./public/screenshots/fleet.png" alt="Fleet Tracking" width="800px" style="margin-bottom: 20px;">
+  <p><i>Real-time surveillance and field officer tracking on a specialized map.</i></p>
+  
+  <br/>
+  
+  <img src="./public/screenshots/timeline.png" alt="Grievance Timeline" width="800px" style="margin-bottom: 20px;">
+  <p><i>Visual tracking of grievance progress from submission to resolution.</i></p>
+  
+  <br/>
+  
+  <img src="./public/screenshots/logs.png" alt="System Logs" width="800px" style="margin-bottom: 20px;">
+  <p><i>Detailed system logs and activity tracking for administrators.</i></p>
+</div>
+
 ---
 
 ## 📁 Architecture
